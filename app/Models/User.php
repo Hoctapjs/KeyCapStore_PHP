@@ -10,25 +10,19 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use Notifiable;
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'phone_number',
-        'address',
-        'city',
-        'country',
-        'is_admin'
+    protected $fillable = ['name', 'email', 'password', 'phone', 'role'];
+    protected $hidden = ['password'];
+    protected $casts = [
+        'role' => 'string',
     ];
-    protected $hidden = ['password', 'remember_token'];
 
-    public function orders()
+    public function addresses()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Address::class);
     }
 
-    public function reviews()
+    public function setPasswordAttribute($password)
     {
-        return $this->hasMany(Review::class);
+        $this->attributes['password'] = bcrypt($password);
     }
 }

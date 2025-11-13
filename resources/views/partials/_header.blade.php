@@ -5,6 +5,7 @@
             <div class="col-sm-4 col-lg-3 text-center text-sm-start">
                 <div class="main-logo">
                     <a href="index.html">
+                        <!-- <img src="images/logo.png" alt="logo" class="img-fluid"> -->
                         <img src="{{ asset('images/logo.png') }}" alt="logo" class="img-fluid">
                     </a>
                 </div>
@@ -34,18 +35,62 @@
             </div>
 
             <div class="col-sm-8 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
+                <!-- <div class="support-box text-end d-none d-xl-block">
+                        <span class="fs-6 text-muted">For Support?</span>
+                        <h5 class="mb-0">+980-34984089</h5>
+                    </div> -->
+
                 <div class="support-box text-end d-none d-xl-block">
-                    <span class="fs-6 text-muted">For Support?</span>
-                    <h5 class="mb-0">+980-34984089</h5>
+                    @auth
+                    <span class="fs-6 text-muted">Chào mừng,</span>
+                    <h5 class="mb-0">{{ Auth::user()->name }}</h5>
+                    @endauth
+                    @guest
+                    <!-- Có thể để trống, hoặc hiển thị link đăng nhập -->
+                    <span class="mb-0"><a href="{{ route('login.form') }}" class="text-decoration-none text-dark">Đăng nhập</a></span>/<span class="mb-0"><a href="{{ route('register.form') }}" class="text-decoration-none text-dark">Đăng ký</a></span>
+                    @endguest
                 </div>
 
                 <ul class="d-flex justify-content-end list-unstyled m-0">
-                    <li>
-                        <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                    <!-- <li>
+                            <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <use xlink:href="#user"></use>
+                                </svg>
+                            </a>
+                        </li> -->
+                    <li class="nav-item dropdown">
+                        <a href="#" class="rounded-circle bg-light p-2 mx-1" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <svg width="24" height="24" viewBox="0 0 24 24">
                                 <use xlink:href="#user"></use>
                             </svg>
                         </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                            @auth
+                            <!-- <li><span class="dropdown-item-text">Chào, {{ Auth::user()->name }}</span></li> -->
+                            <!-- <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li> -->
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-black">Đăng xuất</button>
+                                </form>
+                            </li>
+                            <li>
+                                <button type="submit" class="dropdown-item text-black">Hồ sơ người dùng</button>
+                            </li>
+                            @endauth
+
+                            @guest
+                            <li><a class="dropdown-item" href="{{ route('login.form') }}">Đăng nhập</a></li>
+                            <li><a class="dropdown-item" href="{{ route('register.form') }}">Đăng ký</a></li>
+                            @endguest
+                        </ul>
                     </li>
                     <li>
                         <a href="#" class="rounded-circle bg-light p-2 mx-1">
@@ -71,8 +116,7 @@
                 </ul>
 
                 <div class="cart text-end d-none d-lg-block dropdown">
-                    <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1" type="button"
-                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
+                    <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                         <span class="fs-6 text-muted dropdown-toggle">Your Cart</span>
                         <span class="cart-total fs-5 fw-bold">$1290.00</span>
                     </button>
@@ -81,7 +125,6 @@
 
         </div>
     </div>
-
     <div class="container-fluid">
         <div class="row py-3">
             <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
@@ -93,6 +136,7 @@
                     </button>
 
                     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+
                         <div class="offcanvas-header justify-content-center">
                             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                         </div>
@@ -107,10 +151,18 @@
                             </select>
 
                             <ul class="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
-                                <li class="nav-item active"><a href="#women" class="nav-link">Women</a></li>
-                                <li class="nav-item dropdown"><a href="#men" class="nav-link">Men</a></li>
-                                <li class="nav-item"><a href="#kids" class="nav-link">Kids</a></li>
-                                <li class="nav-item"><a href="#accessories" class="nav-link">Accessories</a></li>
+                                <li class="nav-item active">
+                                    <a href="#women" class="nav-link">Women</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a href="#men" class="nav-link">Men</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#kids" class="nav-link">Kids</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#accessories" class="nav-link">Accessories</a>
+                                </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Pages</a>
                                     <ul class="dropdown-menu" aria-labelledby="pages">
@@ -128,14 +180,20 @@
                                         <li><a href="index.html" class="dropdown-item">404 Error </a></li>
                                     </ul>
                                 </li>
-                                <li class="nav-item"><a href="#brand" class="nav-link">Brand</a></li>
-                                <li class="nav-item"><a href="#sale" class="nav-link">Sale</a></li>
-                                <li class="nav-item"><a href="#blog" class="nav-link">Blog</a></li>
+                                <li class="nav-item">
+                                    <a href="#brand" class="nav-link">Brand</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#sale" class="nav-link">Sale</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#blog" class="nav-link">Blog</a>
+                                </li>
                             </ul>
 
                         </div>
+
                     </div>
-                </nav>
             </div>
         </div>
     </div>
