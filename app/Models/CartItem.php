@@ -4,32 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderItem extends Model
+class CartItem extends Model
 {
     protected $fillable = [
-        'order_id',
+        'cart_id',
         'product_id',
         'variant_id',
-        'title_snapshot',
-        'sku_snapshot',
-        'price',
         'quantity',
-        'total',
+        'price_snapshot',
     ];
 
-    /** Thuộc về đơn hàng */
-    public function order()
+    /** Thuộc về 1 cart */
+    public function cart()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Cart::class);
     }
 
-    /** Sản phẩm gốc */
+    /** Sản phẩm */
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
 
-    /** Biến thể */
+    /** Variant (nếu có) */
     public function variant()
     {
         return $this->belongsTo(ProductVariant::class);

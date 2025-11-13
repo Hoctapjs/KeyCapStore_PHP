@@ -21,5 +21,18 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Các seeder trong Module 3 của Nam
+        $this->call([
+            CartSeeder::class,
+            CartItemSeeder::class,
+            OrderSeeder::class,
+            OrderItemSeeder::class,
+            PaymentSeeder::class,
+            ShipmentSeeder::class,
+            CouponSeeder::class,
+            OrderCouponSeeder::class,
+            CouponRedemptionSeeder::class,
+        ]);
     }
 }
