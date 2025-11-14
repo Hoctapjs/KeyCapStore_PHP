@@ -14,6 +14,10 @@ class CartItem extends Model
         'price_snapshot',
     ];
 
+    protected $casts = [
+        'price_snapshot' => 'decimal:2',
+    ];
+
     /** Thuộc về 1 cart */
     public function cart()
     {

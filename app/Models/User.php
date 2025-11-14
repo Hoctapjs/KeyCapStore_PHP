@@ -9,7 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
+    
     protected $fillable = ['name', 'email', 'password', 'phone', 'role'];
     protected $hidden = ['password'];
     protected $casts = [
@@ -19,6 +20,26 @@ class User extends Authenticatable
     public function addresses()
     {
         return $this->hasMany(Address::class);
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function couponRedemptions()
+    {
+        return $this->hasMany(CouponRedemption::class);
     }
 
     public function setPasswordAttribute($password)

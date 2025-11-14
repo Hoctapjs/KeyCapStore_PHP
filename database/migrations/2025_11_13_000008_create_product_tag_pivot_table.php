@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('product_tag_pivot', function (Blueprint $table) {
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('product_tag_id')->constrained('product_tags')->onDelete('cascade');
+            $table->unique(['product_id', 'product_tag_id'], 'ux_prod_tag_unique');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('product_tag_pivot');
+    }
+};

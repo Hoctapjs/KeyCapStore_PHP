@@ -15,14 +15,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Tạo users trước
+        User::factory(20)->create();
 
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
-        // Các seeder trong Module 3 của Nam
+        // Module 2: Catalog (Products, Categories, Brands, Tags)
+        $this->call([
+            BrandSeeder::class,
+            CategorySeeder::class,
+            ProductTagSeeder::class,
+            ProductSeeder::class, // Tạo products với variants, images
+            ReviewSeeder::class,
+            InventoryMovementSeeder::class,
+        ]);
+
+        // Module 3: Orders, Carts, Payments (của Nam)
         $this->call([
             CartSeeder::class,
             CartItemSeeder::class,
