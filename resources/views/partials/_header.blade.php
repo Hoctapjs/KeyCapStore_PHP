@@ -81,9 +81,24 @@
                                     <button type="submit" class="dropdown-item text-black">Đăng xuất</button>
                                 </form>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <button type="submit" class="dropdown-item text-black">Hồ sơ người dùng</button>
+                            </li> -->
+                            <li>
+                                <a href="{{ route('account.profile') }}" class="dropdown-item text-black">
+                                    Hồ sơ người dùng
+                                </a>
                             </li>
+                            <!-- <li>
+                                <a href="{{ route('addresses.index') }}" class="dropdown-item text-black">
+                                    Sổ Địa Chỉ
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('account.password') }}" class="dropdown-item text-black">
+                                    Đổi Mật Khẩu
+                                </a>
+                            </li> -->
                             @endauth
 
                             @guest
@@ -125,7 +140,7 @@
 
         </div>
     </div>
-    <div class="container-fluid">
+    <!-- <div class="container-fluid">
         <div class="row py-3">
             <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
                 <nav class="main-menu d-flex navbar navbar-expand-lg">
@@ -194,6 +209,94 @@
                         </div>
 
                     </div>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="container-fluid">
+        <div class="row py-3">
+            <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
+                <nav class="main-menu d-flex navbar navbar-expand-lg">
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+                        aria-controls="offcanvasNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+
+                        <div class="offcanvas-header justify-content-center">
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+
+                        <div class="offcanvas-body">
+
+                            <select class="filter-categories border-0 mb-0 me-5">
+                                <option>Danh mục sản phẩm</option>
+                                <option>Keycaps</option>
+                                <option>Switches (Công tắc)</option>
+                                <option>Keyboard Kits (Phím)</option>
+                                <option>Phụ kiện (Accessories)</option>
+                                <option>Artisan Keycaps</option>
+                                <option>Desk Mats (Lót chuột)</option>
+                            </select>
+
+                            <ul class="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
+
+                                <li class="nav-item active">
+                                    <a href="/" class="nav-link">Trang chủ</a>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Keycaps</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/keycaps-profile-cherry" class="dropdown-item">Profile: Cherry</a></li>
+                                        <li><a href="/keycaps-profile-sa" class="dropdown-item">Profile: SA</a></li>
+                                        <li><a href="/keycaps-profile-xda" class="dropdown-item">Profile: XDA</a></li>
+                                        <li><a href="/keycaps-pbt" class="dropdown-item">Chất liệu: PBT</a></li>
+                                        <li><a href="/keycaps-abs" class="dropdown-item">Chất liệu: ABS</a></li>
+                                        <li><a href="/keycaps-artisan" class="dropdown-item">Artisan Keycaps</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Switches</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/switches-linear" class="dropdown-item">Linear</a></li>
+                                        <li><a href="/switches-tactile" class="dropdown-item">Tactile</a></li>
+                                        <li><a href="/switches-clicky" class="dropdown-item">Clicky</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="/accessories" class="nav-link">Phụ kiện</a>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Trang</a>
+                                    <ul class="dropdown-menu" aria-labelledby="pages">
+                                        <li><a href="about.html" class="dropdown-item">Về chúng tôi</a></li>
+                                        <li><a href="shop.html" class="dropdown-item">Cửa hàng</a></li>
+                                        <li><a href="cart.html" class="dropdown-item">Giỏ hàng</a></li>
+                                        <li><a href="checkout.html" class="dropdown-item">Thanh toán</a></li>
+                                        <li><a href="account.html" class="dropdown-item">Tài khoản</a></li>
+                                        <li><a href="contact.html" class="dropdown-item">Liên hệ</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="/sale" class="nav-link">Sale</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="/blog" class="nav-link">Blog</a>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                    </div>
+                </nav>
             </div>
         </div>
     </div>

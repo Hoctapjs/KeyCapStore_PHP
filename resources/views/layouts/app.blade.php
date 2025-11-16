@@ -3,6 +3,16 @@
 
 <head>
     @include('partials._head')
+    <style>
+        .redtitle {
+            color: #73c94c !important;
+        }
+
+        .redbackground {
+            background-color: #73c94c !important;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>

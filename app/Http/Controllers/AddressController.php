@@ -94,6 +94,12 @@ class AddressController extends Controller
         $validatedData = $request->validate([
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
+            'address_line1' => 'required|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
             'is_default' => 'nullable|boolean',
         ]);
 
@@ -110,7 +116,7 @@ class AddressController extends Controller
 
         $address->update($validatedData);
 
-        return redirect()->route('addresses.index')
+        return redirect()->route('account.profile')
             ->with('success', 'Đã cập nhật địa chỉ thành công!');
     }
 
@@ -123,7 +129,7 @@ class AddressController extends Controller
 
         $address->delete();
 
-        return redirect()->route('addresses.index')
+        return redirect()->route('account.profile')
             ->with('success', 'Đã xóa địa chỉ thành công!');
     }
 

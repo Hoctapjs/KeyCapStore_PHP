@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AccountController;
+
 
 
 
@@ -34,3 +37,25 @@ Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('guest')
     ->name('password.update');
+
+Route::resource('addresses', AddressController::class);
+
+// account
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::resource('addresses', AddressController::class);
+
+    // --- CÁC ROUTE CHO TÀI KHOẢN (THÊM VÀO ĐÂY) ---
+    Route::get('/account/profile', [AccountController::class, 'profile'])
+        ->name('account.profile');
+
+    Route::post('/account/profile', [AccountController::class, 'updateProfile'])
+        ->name('account.updateProfile');
+
+    Route::get('/account/password', [AccountController::class, 'password'])
+        ->name('account.password');
+
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])
+        ->name('account.updatePassword');
+});
