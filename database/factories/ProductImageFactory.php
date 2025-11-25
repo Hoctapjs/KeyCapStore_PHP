@@ -12,9 +12,10 @@ class ProductImageFactory extends Factory
 
     public function definition(): array
     {
+        // Use local placeholder image for instant loading
         return [
             'product_id' => Product::factory(),
-            'image_url' => $this->faker->imageUrl(800, 600, 'product'),
+            'image_url' => '/images/products/placeholder.svg',
             'alt' => $this->faker->words(3, true),
             'sort_order' => $this->faker->numberBetween(0, 10),
         ];

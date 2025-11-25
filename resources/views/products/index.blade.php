@@ -1,0 +1,222 @@
+@extends('layouts.app')
+
+@section('title', 'Sản phẩm')
+
+@push('styles')
+<style>
+    .product-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-item figure {
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+    .product-item h3 {
+        min-height: 3em;
+        margin-bottom: 0.5rem;
+    }
+    .product-item .price {
+        margin-top: auto;
+        margin-bottom: 1rem;
+    }
+</style>
+@endpush
+
+@section('content')
+
+<section class="py-5 overflow-hidden">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="section-header d-flex flex-wrap justify-content-between mb-5">
+                    <h2 class="section-title">Sản phẩm</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Filter -->
+            <div class="col-md-3">
+                <div class="card border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-4">Bộ lọc</h5>
+                        
+                        <form method="GET" action="{{ route('products.index') }}" id="filterForm">
+                            <!-- Search -->
+                            <div class="mb-4">
+                                <label class="form-label">Tìm kiếm</label>
+                                <input type="text" name="search" value="{{ request('search') }}" 
+                                       class="form-control" placeholder="Tên sản phẩm...">
+                            </div>
+
+                            <!-- Categories -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Danh mục</h6>
+                                @foreach($categories as $category)
+                                    <div class="mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="category" 
+                                                   value="{{ $category->slug }}" id="cat-{{ $category->id }}"
+                                                   {{ request('category') == $category->slug ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="cat-{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </label>
+                                        </div>
+                                        @if($category->children->count() > 0)
+                                            <div class="ms-4 mt-1">
+                                                @foreach($category->children as $child)
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="category" 
+                                                               value="{{ $child->slug }}" id="cat-{{ $child->id }}"
+                                                               {{ request('category') == $child->slug ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="cat-{{ $child->id }}">
+                                                            {{ $child->name }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Brands -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Thương hiệu</h6>
+                                @foreach($brands->take(5) as $brand)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="brand" 
+                                               value="{{ $brand->slug }}" id="brand-{{ $brand->id }}"
+                                               {{ request('brand') == $brand->slug ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="brand-{{ $brand->id }}">
+                                            {{ $brand->name }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                                @if($brands->count() > 5)
+                                    <small class="text-muted">+{{ $brands->count() - 5 }} thương hiệu khác</small>
+                                @endif
+                            </div>
+
+                            <!-- Price Range -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Khoảng giá</h6>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="min_price" value="{{ request('min_price') }}" 
+                                               class="form-control form-control-sm" placeholder="Từ">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="max_price" value="{{ request('max_price') }}" 
+                                               class="form-control form-control-sm" placeholder="Đến">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-2">Áp dụng</button>
+                            <a href="{{ route('products.index') }}" class="btn btn-outline-secondary w-100">Xóa bộ lọc</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="col-md-9">
+                <!-- Sort & Count -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <p class="text-muted mb-0">Hiển thị {{ $products->count() }} / {{ $products->total() }} sản phẩm</p>
+                    <form method="GET" action="{{ route('products.index') }}" class="d-flex align-items-center gap-2">
+                        @foreach(request()->except('sort') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label class="mb-0 me-2">Sắp xếp:</label>
+                        <select name="sort" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto;">
+                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới nhất</option>
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
+                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá giảm dần</option>
+                            <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Tên A-Z</option>
+                            <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Tên Z-A</option>
+                        </select>
+                    </form>
+                </div>
+
+                <!-- Products -->
+                <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                    @forelse($products as $product)
+                        <div class="col">
+                            <div class="product-item">
+                                @if($product->stock <= 0)
+                                    <span class="badge bg-danger position-absolute m-3">Hết hàng</span>
+                                @endif
+                                <a href="#" class="btn-wishlist">
+                                    <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                </a>
+                                <figure>
+                                    <a href="{{ route('products.show', $product->slug) }}" title="{{ $product->title }}">
+                                        @if($product->productImages->first())
+                                            <img src="{{ $product->productImages->first()->image_url }}" 
+                                                 alt="{{ $product->title }}" class="tab-image" 
+                                                 style="width: 100%; height: 300px; object-fit: cover;">
+                                        @else
+                                            <img src="{{ asset('images/placeholder.png') }}" 
+                                                 alt="{{ $product->title }}" class="tab-image"
+                                                 style="width: 100%; height: 300px; object-fit: cover;">
+                                        @endif
+                                    </a>
+                                </figure>
+                                <h3>{{ Str::limit($product->title, 40) }}</h3>
+                                @if($product->brand)
+                                    <span class="qty">{{ $product->brand->name }}</span>
+                                @endif
+                                <span class="rating">
+                                    <svg width="24" height="24" class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 
+                                    {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : '0.0' }}
+                                </span>
+                                <span class="price">{{ number_format($product->price, 0, ',', '.') }}đ</span>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="input-group product-qty">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                            </button>
+                                        </span>
+                                        <input type="text" name="quantity" class="form-control input-number" value="1" min="1">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                            </button>
+                                        </span>
+                                    </div>
+                                    <a href="#" class="nav-link">
+                                        <iconify-icon icon="uil:shopping-cart"></iconify-icon>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <p class="text-muted fs-5">Không tìm thấy sản phẩm nào</p>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Pagination -->
+                @if ($products->hasPages())
+                <div class="mt-5">
+                    <nav>
+                        {{ $products->onEachSide(1)->appends(request()->query())->links('vendor.pagination.custom') }}
+                    </nav>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</section>
+
+@endsection
