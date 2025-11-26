@@ -136,6 +136,7 @@
                         <span class="cart-total fs-5 fw-bold">$1290.00</span>
                     </button>
                 </div> -->
+                @include('partials._cart-bootstrap')
                 <div class="cart text-end d-none d-lg-block dropdown">
                     <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1"
                         type="button"

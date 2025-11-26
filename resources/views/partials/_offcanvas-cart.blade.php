@@ -5,29 +5,7 @@
 
     <div class="offcanvas-body">
         <div class="order-md-last">
-            @php
-            use App\Models\Cart;
-            use Illuminate\Support\Facades\Auth;
-
-            // Nếu controller không truyền vào thì tự tính
-            if (!isset($cart) || !isset($cartCount) || !isset($cartTotal)) {
-            if (Auth::check()) {
-            $cart = Cart::firstOrCreate(
-            ['user_id' => Auth::id()]
-            )->load(['items.product', 'items.variant']);
-            } else {
-            $sessionId = session()->getId();
-            $cart = Cart::firstOrCreate(
-            ['session_id' => $sessionId]
-            )->load(['items.product', 'items.variant']);
-            }
-
-            $cartCount = $cart->items->sum('quantity');
-            $cartTotal = $cart->items->sum(function ($item) {
-            return $item->quantity * $item->price_snapshot;
-            });
-            }
-            @endphp
+            @include('partials._cart-bootstrap')
             <!-- HEADER -->
             <h4 class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-primary redtitle">Your cart</span>
