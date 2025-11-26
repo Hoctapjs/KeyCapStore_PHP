@@ -136,7 +136,29 @@
                         <span class="cart-total fs-5 fw-bold">$1290.00</span>
                     </button>
                 </div> -->
-                @include('partials._cart-bootstrap')
+                @php
+                use App\Models\Cart;
+                use Illuminate\Support\Facades\Auth;
+
+                // Nếu controller không truyền vào thì tự tính
+                if (!isset($cart) || !isset($cartCount) || !isset($cartTotal)) {
+                if (Auth::check()) {
+                $cart = Cart::firstOrCreate(
+                ['user_id' => Auth::id()]
+                )->load(['items.product', 'items.variant']);
+                } else {
+                $sessionId = session()->getId();
+                $cart = Cart::firstOrCreate(
+                ['session_id' => $sessionId]
+                )->load(['items.product', 'items.variant']);
+                }
+
+                $cartCount = $cart->items->sum('quantity');
+                $cartTotal = $cart->items->sum(function ($item) {
+                return $item->quantity * $item->price_snapshot;
+                });
+                }
+                @endphp
                 <div class="cart text-end d-none d-lg-block dropdown">
                     <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1"
                         type="button"
