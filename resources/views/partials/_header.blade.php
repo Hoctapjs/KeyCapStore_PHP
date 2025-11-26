@@ -130,10 +130,24 @@
                     </li>
                 </ul>
 
-                <div class="cart text-end d-none d-lg-block dropdown">
+                <!-- <div class="cart text-end d-none d-lg-block dropdown">
                     <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                         <span class="fs-6 text-muted dropdown-toggle">Your Cart</span>
                         <span class="cart-total fs-5 fw-bold">$1290.00</span>
+                    </button>
+                </div> -->
+                <div class="cart text-end d-none d-lg-block dropdown">
+                    <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1"
+                        type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasCart"
+                        aria-controls="offcanvasCart">
+
+                        <span class="fs-6 text-muted dropdown-toggle">Your Cart ({{ $cartCount }})</span>
+
+                        <span class="cart-total fs-5 fw-bold">
+                            {{ number_format($cartTotal, 0, ',', '.') }}đ
+                        </span>
                     </button>
                 </div>
             </div>

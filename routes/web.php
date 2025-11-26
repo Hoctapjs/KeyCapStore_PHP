@@ -13,9 +13,8 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
-
-
-
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -27,15 +26,15 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/temp', [HomeController::class, 'temp'])->name('temp');
 
 // Test route to check password
-Route::get('/test-login', function() {
+Route::get('/test-login', function () {
     $user = \App\Models\User::where('email', 'admin@test.com')->first();
-    if(!$user) {
+    if (!$user) {
         return 'User not found!';
     }
-    
+
     $password = '12345678';
     $check = \Illuminate\Support\Facades\Hash::check($password, $user->password);
-    
+
     return [
         'user_found' => true,
         'email' => $user->email,
@@ -99,30 +98,60 @@ Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('cat
 
 // Admin Routes - Product Management
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])->group(function () {
-    
+
     // Dashboard
-    Route::get('/dashboard', function() {
+    Route::get('/dashboard', function () {
         $totalProducts = \App\Models\Product::count();
         $totalCategories = \App\Models\Category::count();
         $totalBrands = \App\Models\Brand::count();
         $lowStockProducts = \App\Models\Product::where('stock', '<', 10)->count();
-        
+
         return view('admin.dashboard', compact('totalProducts', 'totalCategories', 'totalBrands', 'lowStockProducts'));
     })->name('dashboard');
-    
+
     // Products
     Route::resource('products', AdminProductController::class);
-    
+
     // Categories
     Route::resource('categories', AdminCategoryController::class);
-    
+
     // Brands
     Route::resource('brands', AdminBrandController::class);
-    
+
     // Inventory Management
     Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('inventory/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
     Route::get('inventory/{product}', [AdminInventoryController::class, 'show'])->name('inventory.show');
     Route::post('inventory/{product}/update-stock', [AdminInventoryController::class, 'updateStock'])->name('inventory.update-stock');
     Route::post('inventory/variant/{variant}/update-stock', [AdminInventoryController::class, 'updateVariantStock'])->name('inventory.update-variant-stock');
+});
+
+// Route cho Cart (chức năng liên quan đến giỏ hàng)
+// Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+// Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+
+// Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+
+// Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+
+// // Route cho AJAX
+// Route::get('/cart/ajax/info', [CartController::class, 'ajaxCartInfo'])
+//     ->name('cart.ajax.info');
+
+// Cart
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+
+// Ajax cart info
+Route::get('/cart/ajax/info', [CartController::class, 'ajaxCartInfo'])->name('cart.ajax.info');
+
+
+Route::get('/cart/ajax/table', [CartController::class, 'ajaxTable']);
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 });

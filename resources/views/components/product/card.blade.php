@@ -28,7 +28,14 @@
                 </svg>
             </button>
         </div>
-        <a href="#" class="nav-link">Thêm vào giỏ <iconify-icon icon="uil:shopping-cart"></iconify-icon></a>
+        <form action="{{ route('cart.add') }}" method="POST">
+            @csrf
+            <input type="hidden" name="product_id" value="{{ $product->id }}">
+            <input type="hidden" name="variant_id" value="{{ $selectedVariant->id ?? null }}">
+            <input type="number" name="quantity" value="1" min="1" class="form-control w-25">
+            <button class="btn btn-primary mt-3">Thêm vào giỏ hàng mè<iconify-icon icon="uil:shopping-cart"></button>
+            <!-- <a href="#" class="nav-link">Thêm vào giỏ <iconify-icon icon="uil:shopping-cart"></iconify-icon></a> -->
+        </form>
     </div>
 </div>
 
