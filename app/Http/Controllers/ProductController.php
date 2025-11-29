@@ -13,14 +13,15 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::query()
-            ->select('id', 'title', 'slug', 'code', 'brand_id', 'price', 'stock', 'status', 'created_at')
+            ->select('id', 'title', 'slug', 'code', 'brand_id', 'stock', 'status', 'created_at')
             ->with([
                 'brand:id,name,slug',
                 'productImages' => function($query) {
                     $query->select('id', 'product_id', 'image_url', 'alt')
                         ->orderBy('sort_order')
                         ->limit(1);
-                }
+                },
+                'variants:id,product_id,price,stock_quantity'
             ])
             ->withAvg(['reviews as reviews_avg_rating' => function($query) {
                 $query->where('status', 'approved');
@@ -48,12 +49,16 @@ class ProductController extends Controller
             });
         }
 
-        // Filter by price range
+        // Filter by price range (using variants price)
         if ($request->filled('min_price') && is_numeric($request->min_price)) {
-            $query->where('price', '>=', $request->min_price);
+            $query->whereHas('variants', function($q) use ($request) {
+                $q->where('price', '>=', $request->min_price);
+            });
         }
         if ($request->filled('max_price') && is_numeric($request->max_price)) {
-            $query->where('price', '<=', $request->max_price);
+            $query->whereHas('variants', function($q) use ($request) {
+                $q->where('price', '<=', $request->max_price);
+            });
         }
 
         // Search
@@ -70,10 +75,14 @@ class ProductController extends Controller
         $sortBy = $request->get('sort', 'latest');
         switch ($sortBy) {
             case 'price_asc':
-                $query->orderBy('price', 'asc');
+                // Sort by minimum variant price ascending
+                $query->withMin('variants', 'price')
+                      ->orderBy('variants_min_price', 'asc');
                 break;
             case 'price_desc':
-                $query->orderBy('price', 'desc');
+                // Sort by minimum variant price descending
+                $query->withMin('variants', 'price')
+                      ->orderBy('variants_min_price', 'desc');
                 break;
             case 'name_asc':
                 $query->orderBy('title', 'asc');
@@ -134,10 +143,13 @@ class ProductController extends Controller
             ->firstOrFail();
 
         // Get related products (same category) - optimized
-        $relatedProducts = Product::select('id', 'title', 'slug', 'price', 'stock')
-            ->with(['productImages' => function($query) {
-                $query->select('id', 'product_id', 'image_url')->orderBy('sort_order')->limit(1);
-            }])
+        $relatedProducts = Product::select('id', 'title', 'slug', 'stock')
+            ->with([
+                'productImages' => function($query) {
+                    $query->select('id', 'product_id', 'image_url')->orderBy('sort_order')->limit(1);
+                },
+                'variants:id,product_id,price,stock_quantity'
+            ])
             ->active()
             ->whereHas('categories', function($q) use ($product) {
                 $q->whereIn('categories.id', $product->categories->pluck('id'));

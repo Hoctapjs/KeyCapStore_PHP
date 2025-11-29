@@ -114,7 +114,7 @@
                     <!-- Price -->
                     <div class="mb-4">
                         <span class="display-4 fw-bold text-primary product-price">
-                            {{ number_format($product->price, 0, ',', '.') }}đ
+                            {{ $product->price_range }}
                         </span>
                     </div>
 
@@ -398,7 +398,7 @@
                                     @if($related->brand)
                                     <span class="qty">{{ $related->brand->name }}</span>
                                     @endif
-                                    <span class="price">{{ number_format($related->price, 0, ',', '.') }}đ</span>
+                                    <span class="price">{{ $related->price_range }}</span>
                                 </div>
                             </div>
                             @endforeach

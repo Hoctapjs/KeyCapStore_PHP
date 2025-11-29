@@ -109,4 +109,26 @@ class Product extends Model
 
         return (int) $this->stock;
     }
+    // Accessors & Helpers
+    public function getMinPriceAttribute()
+    {
+        return $this->variants()->min('price') ?? 0;
+    }
+
+    public function getMaxPriceAttribute()
+    {
+        return $this->variants()->max('price') ?? 0;
+    }
+
+    public function getPriceRangeAttribute()
+    {
+        $min = $this->min_price;
+        $max = $this->max_price;
+        
+        if ($min == $max || $max == 0) {
+            return number_format($min, 0, ',', '.') . 'đ';
+        }
+        
+        return number_format($min, 0, ',', '.') . 'đ - ' . number_format($max, 0, ',', '.') . 'đ';
+    }
 }

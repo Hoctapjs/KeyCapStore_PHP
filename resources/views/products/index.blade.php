@@ -176,7 +176,7 @@
                                     </svg> 
                                     {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : '0.0' }}
                                 </span>
-                                <span class="price">{{ number_format($product->price, 0, ',', '.') }}đ</span>
+                                <span class="price">{{ number_format($product->min_price, 0, ',', '.') }}đ</span>
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="input-group product-qty">
                                         <span class="input-group-btn">
