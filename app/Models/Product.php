@@ -40,14 +40,14 @@ class Product extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'product_categories', 'product_id', 'category_id')
-                    ->withPivot('primary_flag');
+            ->withPivot('primary_flag');
     }
 
     public function primaryCategory()
     {
         return $this->belongsToMany(Category::class, 'product_categories', 'product_id', 'category_id')
-                    ->wherePivot('primary_flag', true)
-                    ->first();
+            ->wherePivot('primary_flag', true)
+            ->first();
     }
 
     public function productImages()
@@ -94,5 +94,19 @@ class Product extends Model
     public function scopeInStock($query)
     {
         return $query->where('stock', '>', 0);
+    }
+
+    /**
+     * Stock hiển thị cho UI:
+     * - Nếu có variant: tổng stock_quantity của tất cả variant
+     * - Nếu không: dùng cột stock của product
+     */
+    public function getDisplayStockAttribute()
+    {
+        if ($this->variants()->count() > 0) {
+            return (int) $this->variants()->sum('stock_quantity');
+        }
+
+        return (int) $this->stock;
     }
 }

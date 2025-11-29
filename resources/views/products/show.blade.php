@@ -119,16 +119,32 @@
                     </div>
 
                     <!-- Stock Status -->
-                    <div class="mb-4">
-                        @if($product->stock > 0)
+                    <!-- <div class="mb-4">
+                        @php
+                        $displayStock = $product->display_stock;
+                        @endphp
+
+                        @if($displayStock > 0)
                         <span class="badge bg-success fs-6 px-3 py-2">
-                            <svg width="16" height="16" fill="currentColor">
-                                <use xlink:href="#check"></use>
-                            </svg>
-                            Còn {{ $product->stock }} sản phẩm
+                            Còn {{ $displayStock }} sản phẩm
                         </span>
                         @else
                         <span class="badge bg-danger fs-6 px-3 py-2 fw-bold">Hết hàng</span>
+                        @endif
+                    </div> -->
+                    @php
+                    $displayStock = $product->display_stock;
+                    @endphp
+
+                    <div class="mb-4" id="stock-status">
+                        @if($displayStock > 0)
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            Còn {{ $displayStock }} sản phẩm
+                        </span>
+                        @else
+                        <span class="badge bg-danger fs-6 px-3 py-2 fw-bold">
+                            Hết hàng
+                        </span>
                         @endif
                     </div>
 
@@ -161,7 +177,7 @@
                     @endphp
 
                     <div class="mb-4">
-                        <input type="hidden" id="selected-variant-id" name="variant_id">
+                        <!-- <input type="hidden" id="selected-variant-id" name="variant_id"> -->
 
                         <!-- Size Selection -->
                         <div class="mb-3">
@@ -230,7 +246,7 @@
                                 <div class="input-group product-qty">
                                     <button type="button" class="quantity-left-minus btn btn-danger">-</button>
                                     <input type="number" name="quantity" class="form-control text-center input-number"
-                                        min="1" value="1" max="{{ $product->stock }}">
+                                        min="1" value="1" max="{{ $displayStock }}">
                                     <button type="button" class="quantity-right-plus btn btn-success">+</button>
                                 </div>
                             </div>
@@ -248,6 +264,17 @@
                         $(function() {
                             $("#addToCartForm").on("submit", function(e) {
                                 e.preventDefault();
+
+                                // Nếu sản phẩm có variant thì bắt buộc phải chọn
+                                const variantsDataEl = document.getElementById('variants-data');
+                                const hasVariants = variantsDataEl && Object.keys(JSON.parse(variantsDataEl.textContent || '{}')).length > 0;
+
+                                const variantId = $('#addToCartForm input[name="variant_id"]').val();
+
+                                if (hasVariants && !variantId) {
+                                    alert('Vui lòng chọn kích thước và màu sắc trước khi thêm vào giỏ hàng.');
+                                    return;
+                                }
 
                                 $.post("{{ route('cart.add') }}", $(this).serialize(), function() {
                                     updateCartUI();
@@ -427,24 +454,44 @@
 
             // Re-bind color click event
             $('.color-option').click(function() {
-                if ($(this).data('stock') > 0) {
-                    // Update UI
+                const stock = $(this).data('stock');
+
+                if (stock > 0) {
+                    // Update UI chọn màu
                     $('.color-option').removeClass('btn-secondary').addClass('btn-outline-secondary');
                     $(this).removeClass('btn-outline-secondary').addClass('btn-secondary');
 
-                    // Update hidden input
-                    $('#selected-variant-id').val($(this).data('variant-id'));
+                    // Cập nhật variant_id trong form
+                    $('#addToCartForm input[name="variant_id"]').val($(this).data('variant-id'));
 
-                    // Update price display
+                    // Cập nhật giá
                     const price = $(this).data('price');
                     const formattedPrice = new Intl.NumberFormat('vi-VN').format(price);
                     $('.product-price').html(formattedPrice + 'đ');
 
-                    // Update max quantity
-                    $('.input-number').attr('max', $(this).data('stock'));
-                    if (parseInt($('.input-number').val()) > $(this).data('stock')) {
-                        $('.input-number').val($(this).data('stock'));
+                    // Cập nhật max quantity
+                    $('.input-number').attr('max', stock);
+                    if (parseInt($('.input-number').val()) > stock) {
+                        $('.input-number').val(stock);
                     }
+
+                    // Cập nhật badge tồn kho
+                    $('#stock-status').html(`
+            <span class="badge bg-success fs-6 px-3 py-2">
+                Còn ${stock} sản phẩm
+            </span>
+        `);
+
+                    // Đảm bảo input + nút +/- dùng được
+                    $('.input-number, .quantity-right-plus, .quantity-left-minus').prop('disabled', false);
+                } else {
+                    // Trường hợp muốn allow click variant hết hàng (nếu bạn không disabled button)
+                    $('#stock-status').html(`
+            <span class="badge bg-danger fs-6 px-3 py-2 fw-bold">
+                Hết hàng
+            </span>
+        `);
+                    $('.input-number, .quantity-right-plus, .quantity-left-minus').prop('disabled', true);
                 }
             });
         });

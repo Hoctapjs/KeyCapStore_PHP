@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\CouponRedemption;
+use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
@@ -173,15 +174,50 @@ class CheckoutController extends Controller
 
         // 6. OrderItems từ CartItems
         foreach ($cartItems as $item) {
+            // 6.1 Tạo order item
             $order->items()->create([
                 'product_id'     => $item->product_id,
                 'variant_id'     => $item->variant_id,
                 'title_snapshot' => $item->product->title,
-                'sku_snapshot'   => $item->variant->sku ?? $item->product->sku ?? null,
+                // products table không có 'sku', chỉ có 'code' ⇒ dùng code
+                'sku_snapshot'   => $item->variant->sku ?? $item->product->code ?? null,
                 'price'          => $item->price_snapshot,
                 'quantity'       => $item->quantity,
                 'total'          => $item->price_snapshot * $item->quantity,
             ]);
+
+            // 6.2 Trừ tồn kho + ghi log inventory
+            if ($item->variant_id) {
+                // Trừ ở variant
+                $variant = $item->variant; // đã load từ getCart()
+                if ($variant) {
+                    $variant->stock_quantity = max(0, $variant->stock_quantity - $item->quantity);
+                    $variant->save();
+
+                    InventoryMovement::create([
+                        'product_id' => $item->product_id,
+                        'variant_id' => $item->variant_id,
+                        'change_qty' => -$item->quantity,
+                        'reason'     => 'order',
+                        'note'       => 'Order ' . $order->code,
+                    ]);
+                }
+            } else {
+                // Trừ ở product
+                $product = $item->product;
+                if ($product) {
+                    $product->stock = max(0, $product->stock - $item->quantity);
+                    $product->save();
+
+                    InventoryMovement::create([
+                        'product_id' => $item->product_id,
+                        'variant_id' => null,
+                        'change_qty' => -$item->quantity,
+                        'reason'     => 'order',
+                        'note'       => 'Order ' . $order->code,
+                    ]);
+                }
+            }
         }
 
         // 7. Lưu lại việc dùng coupon (nếu có)

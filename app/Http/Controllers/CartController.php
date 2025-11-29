@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,31 +39,98 @@ class CartController extends Controller
     }
 
     /** Add to cart */
+    // public function add(Request $request)
+    // {
+    //     $request->validate([
+    //         'product_id' => 'required|exists:products,id',
+    //         'variant_id' => 'nullable|exists:product_variants,id',
+    //         'quantity' => 'required|integer|min:1'
+    //     ]);
+
+    //     $cart = $this->getCart();
+    //     $product = Product::findOrFail($request->product_id);
+
+    //     $cartItem = $cart->items()
+    //         ->where('product_id', $request->product_id)
+    //         ->where('variant_id', $request->variant_id)
+    //         ->first();
+
+    //     if ($cartItem) {
+    //         $cartItem->quantity += $request->quantity;
+    //         $cartItem->save();
+    //     } else {
+    //         $cart->items()->create([
+    //             'product_id' => $product->id,
+    //             'variant_id' => $request->variant_id,
+    //             'quantity' => $request->quantity,
+    //             'price_snapshot' => $product->price
+    //         ]);
+    //     }
+
+    //     return response()->json(['success' => true]);
+    // }
     public function add(Request $request)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'variant_id' => 'nullable|exists:product_variants,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity'   => 'required|integer|min:1'
         ]);
 
-        $cart = $this->getCart();
+        $cart    = $this->getCart();
         $product = Product::findOrFail($request->product_id);
 
-        $cartItem = $cart->items()
-            ->where('product_id', $request->product_id)
-            ->where('variant_id', $request->variant_id)
+        // Chuẩn hóa variant_id: "" => null
+        $variantId = $request->input('variant_id');
+        if ($variantId === '' || $variantId === null) {
+            $variantId = null;
+        }
+
+        $variant = null;
+        if ($variantId) {
+            // Đảm bảo variant thuộc về đúng product
+            $variant = ProductVariant::where('product_id', $product->id)
+                ->findOrFail($variantId);
+        }
+
+        // Xác định giá & tồn kho theo variant / product
+        $price = $variant && $variant->price !== null
+            ? $variant->price
+            : $product->price;
+
+        $availableStock = $variant
+            ? $variant->stock_quantity
+            : $product->stock;
+
+        $qty = (int) $request->quantity;
+
+        // Kiểm tra tổng quantity trong cart không vượt tồn kho
+        $existingItem = $cart->items()
+            ->where('product_id', $product->id)
+            ->where('variant_id', $variantId)
             ->first();
 
-        if ($cartItem) {
-            $cartItem->quantity += $request->quantity;
-            $cartItem->save();
+        $currentQtyInCart = $existingItem ? $existingItem->quantity : 0;
+
+        if ($qty + $currentQtyInCart > $availableStock) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Số lượng vượt quá tồn kho hiện có.'
+            ], 422);
+        }
+
+        // Tạo / cập nhật cart item
+        if ($existingItem) {
+            $existingItem->quantity += $qty;
+            // Có thể giữ lại price_snapshot cũ, hoặc cập nhật theo giá mới:
+            $existingItem->price_snapshot = $price;
+            $existingItem->save();
         } else {
             $cart->items()->create([
-                'product_id' => $product->id,
-                'variant_id' => $request->variant_id,
-                'quantity' => $request->quantity,
-                'price_snapshot' => $product->price
+                'product_id'     => $product->id,
+                'variant_id'     => $variantId,
+                'quantity'       => $qty,
+                'price_snapshot' => $price,
             ]);
         }
 

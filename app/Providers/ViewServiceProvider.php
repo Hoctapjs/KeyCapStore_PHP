@@ -26,7 +26,8 @@ class ViewServiceProvider extends ServiceProvider
                 $cart = Cart::firstOrCreate(['session_id' => session()->getId()]);
             }
 
-            $cart->load('items.product');
+            // $cart->load('items.product');
+            $cart->load(['items.product', 'items.variant']);
 
             $cartCount = $cart->items->sum('quantity');
 
