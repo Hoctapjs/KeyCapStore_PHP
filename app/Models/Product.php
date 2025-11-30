@@ -96,6 +96,16 @@ class Product extends Model
         return $query->where('stock', '>', 0);
     }
 
+    // Accessors & Helpers
+    
+    /**
+     * Tổng số lượng tồn kho từ tất cả variants
+     */
+    public function getTotalStockAttribute()
+    {
+        return (int) $this->variants()->sum('stock_quantity');
+    }
+
     /**
      * Stock hiển thị cho UI:
      * - Nếu có variant: tổng stock_quantity của tất cả variant
@@ -104,20 +114,44 @@ class Product extends Model
     public function getDisplayStockAttribute()
     {
         if ($this->variants()->count() > 0) {
-            return (int) $this->variants()->sum('stock_quantity');
+            return $this->total_stock;
         }
 
         return (int) $this->stock;
     }
-    // Accessors & Helpers
+
     public function getMinPriceAttribute()
     {
-        return $this->variants()->min('price') ?? 0;
+        // Kiểm tra variants đã được load chưa, nếu rồi thì dùng collection, nếu chưa thì query
+        if ($this->relationLoaded('variants')) {
+            $variantMinPrice = $this->variants->where('price', '>', 0)->min('price');
+        } else {
+            $variantMinPrice = $this->variants()->where('price', '>', 0)->min('price');
+        }
+        
+        // Nếu không có variants hoặc giá variant = 0/null, dùng giá gốc sản phẩm
+        if ($variantMinPrice === null || $variantMinPrice == 0) {
+            return $this->price ?? 0;
+        }
+        
+        return $variantMinPrice;
     }
 
     public function getMaxPriceAttribute()
     {
-        return $this->variants()->max('price') ?? 0;
+        // Kiểm tra variants đã được load chưa, nếu rồi thì dùng collection, nếu chưa thì query
+        if ($this->relationLoaded('variants')) {
+            $variantMaxPrice = $this->variants->where('price', '>', 0)->max('price');
+        } else {
+            $variantMaxPrice = $this->variants()->where('price', '>', 0)->max('price');
+        }
+        
+        // Nếu không có variants hoặc giá variant = 0/null, dùng giá gốc sản phẩm
+        if ($variantMaxPrice === null || $variantMaxPrice == 0) {
+            return $this->price ?? 0;
+        }
+        
+        return $variantMaxPrice;
     }
 
     public function getPriceRangeAttribute()

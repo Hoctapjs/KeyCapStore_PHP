@@ -87,11 +87,26 @@
                             <small class="text-muted">{{ $product->code }}</small>
                         </td>
                         <td>{{ $product->brand->name ?? 'N/A' }}</td>
-                        <td>{{ number_format($product->price, 0, ',', '.') }} đ</td>
                         <td>
-                            <span class="badge {{ $product->stock > 10 ? 'bg-success' : ($product->stock > 0 ? 'bg-warning' : 'bg-danger') }}">
-                                {{ $product->stock }}
+                            @if($product->variants->count() > 0)
+                                {{ number_format($product->min_price, 0, ',', '.') }}đ
+                                @if($product->min_price != $product->max_price)
+                                    - {{ number_format($product->max_price, 0, ',', '.') }}đ
+                                @endif
+                            @else
+                                {{ number_format($product->price, 0, ',', '.') }}đ
+                            @endif
+                        </td>
+                        <td>
+                            @php
+                                $totalStock = $product->display_stock;
+                            @endphp
+                            <span class="badge {{ $totalStock > 10 ? 'bg-success' : ($totalStock > 0 ? 'bg-warning' : 'bg-danger') }}">
+                                {{ $totalStock }}
                             </span>
+                            @if($product->variants->count() > 0)
+                                <small class="text-muted d-block">{{ $product->variants->count() }} biến thể</small>
+                            @endif
                         </td>
                         <td>
                             @if($product->status == 'active')
@@ -103,21 +118,27 @@
                             @endif
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <a href="{{ route('admin.products.edit', $product->id) }}" 
-                                   class="btn btn-warning">
-                                    <i class="bi bi-pencil"></i> Sửa
+                            <div class="btn-group-vertical btn-group-sm w-100" role="group">
+                                <a href="{{ route('admin.products.variants.index', $product->id) }}" 
+                                   class="btn btn-info btn-sm mb-1">
+                                    <i class="bi bi-grid-3x3"></i> Biến thể ({{ $product->variants->count() }})
                                 </a>
-                                <form action="{{ route('admin.products.destroy', $product->id) }}" 
-                                      method="POST" 
-                                      class="d-inline"
-                                      onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-trash"></i> Xóa
-                                    </button>
-                                </form>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('admin.products.edit', $product->id) }}" 
+                                       class="btn btn-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ route('admin.products.destroy', $product->id) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </td>
                     </tr>

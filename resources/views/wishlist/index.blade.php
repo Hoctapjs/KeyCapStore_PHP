@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Sản phẩm')
+@section('title', 'Danh sách yêu thích')
 
 @push('styles')
 <style>
@@ -24,40 +24,18 @@
         margin-bottom: 1rem;
     }
     
-    /* Wishlist button styles */
-    .btn-wishlist {
-        z-index: 10;
-        width: 40px;
-        height: 40px;
-        background-color: rgba(255, 255, 255, 0.9);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
+    /* Wishlist remove button */
+    .btn-remove-wishlist {
+        width: 38px;
+        height: 38px;
+        background-color: rgba(255, 68, 68, 0.3);
         border: none;
-        cursor: pointer;
+        padding: 0;
+        transition: all 0.3s ease;
     }
-    .btn-wishlist:hover {
-        background-color: #fff;
+    .btn-remove-wishlist:hover {
+        background-color: #ff4444;
         transform: scale(1.1);
-    }
-    .btn-wishlist[data-in-wishlist="true"] {
-        background-color: #dc3545;
-        
-    }
- 
-    .btn-wishlist[data-in-wishlist="true"] svg {
-        fill: #dc3545;
-        stroke: #dc3545;
-    }
-    .btn-wishlist[data-in-wishlist="false"] svg {
-        fill: none;
-        stroke: #333;
-    }
-    .btn-wishlist[data-in-wishlist="false"]:hover svg {
-        fill: #dc3545;
-        stroke: #dc3545;
     }
 </style>
 @endpush
@@ -69,10 +47,17 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="section-header d-flex flex-wrap justify-content-between mb-5">
-                    <h2 class="section-title">Sản phẩm</h2>
+                    <h2 class="section-title">Danh sách yêu thích của tôi</h2>
                 </div>
             </div>
         </div>
+
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
 
         <div class="row">
             <!-- Sidebar Filter -->
@@ -81,7 +66,7 @@
                     <div class="card-body">
                         <h5 class="mb-4">Bộ lọc</h5>
                         
-                        <form method="GET" action="{{ route('products.index') }}" id="filterForm">
+                        <form method="GET" action="{{ route('wishlist.index') }}" id="filterForm">
                             <!-- Search -->
                             <div class="mb-4">
                                 <label class="form-label">Tìm kiếm</label>
@@ -154,7 +139,7 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 mb-2">Áp dụng</button>
-                            <a href="{{ route('products.index') }}" class="btn btn-outline-secondary w-100">Xóa bộ lọc</a>
+                            <a href="{{ route('wishlist.index') }}" class="btn btn-outline-secondary w-100">Xóa bộ lọc</a>
                         </form>
                     </div>
                 </div>
@@ -164,8 +149,8 @@
             <div class="col-md-9">
                 <!-- Sort & Count -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <p class="text-muted mb-0">Hiển thị {{ $products->count() }} / {{ $products->total() }} sản phẩm</p>
-                    <form method="GET" action="{{ route('products.index') }}" class="d-flex align-items-center gap-2">
+                    <p class="text-muted mb-0">Hiển thị {{ $wishlists->count() }} / {{ $wishlists->total() }} sản phẩm</p>
+                    <form method="GET" action="{{ route('wishlist.index') }}" class="d-flex align-items-center gap-2">
                         @foreach(request()->except('sort') as $key => $value)
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endforeach
@@ -181,83 +166,67 @@
                 </div>
 
                 <!-- Products -->
+                @if($wishlists->count() > 0)
                 <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-                    @forelse($products as $product)
+                    @foreach($wishlists as $wishlist)
                         <div class="col">
-                            <div class="product-item" data-url="{{ route('products.show', $product->slug) }}">
-                                @if($product->stock <= 0)
-                                    <span class="badge bg-danger position-absolute m-3" style="z-index: 5;">Hết hàng</span>
-                                @endif
-                                @php
-                                    $isInWishlist = auth()->check() && auth()->user()->wishlistProducts->contains($product->id);
-                                @endphp
-                                <a href="javascript:void(0)" 
-                                   class="btn-wishlist wishlist-toggle" 
-                                   data-product-id="{{ $product->id }}"
-                                   data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
-                                   title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}"
-                                   onclick="event.stopPropagation();">
-                                    <svg width="24" height="24">
-                                        <use xlink:href="#heart"></use>
-                                    </svg>
-                                </a>
+                            <div class="product-item" data-url="{{ route('products.show', $wishlist->product->slug) }}">
+                                <form action="{{ route('wishlist.remove', $wishlist->product) }}" method="POST" class="position-absolute end-0 m-3" style="z-index: 10;" onsubmit="event.stopPropagation();">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn rounded-circle d-flex align-items-center justify-content-center btn-remove-wishlist" title="Xóa khỏi yêu thích" onclick="event.stopPropagation();">
+                                        <svg width="18" height="18" fill="white" viewBox="0 0 16 16">
+                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                        </svg>
+                                    </button>
+                                </form>
                                 <figure>
-                                        @if($product->productImages->first())
-                                            <img src="{{ $product->productImages->first()->image_url }}" 
-                                                 alt="{{ $product->title }}" class="tab-image" 
+                                        @if($wishlist->product->productImages->first())
+                                            <img src="{{ $wishlist->product->productImages->first()->image_url }}" 
+                                                 alt="{{ $wishlist->product->title }}" class="tab-image" 
                                                  style="width: 100%; height: 300px; object-fit: cover;">
                                         @else
                                             <img src="{{ asset('images/placeholder.svg') }}" 
-                                                 alt="{{ $product->title }}" class="tab-image"
+                                                 alt="{{ $wishlist->product->title }}" class="tab-image"
                                                  style="width: 100%; height: 300px; object-fit: contain; background: #f8f8f8;">
                                         @endif
                                 </figure>
-                                <h3>{{ Str::limit($product->title, 40) }}</h3>
-                                @if($product->brand)
-                                    <span class="qty">{{ $product->brand->name }}</span>
+                                <h3>{{ Str::limit($wishlist->product->title, 40) }}</h3>
+                                @if($wishlist->product->brand)
+                                    <span class="qty">{{ $wishlist->product->brand->name }}</span>
                                 @endif
                                 <span class="rating">
                                     <svg width="24" height="24" class="text-primary">
                                         <use xlink:href="#star-solid"></use>
                                     </svg> 
-                                    {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : '0.0' }}
+                                    {{ $wishlist->product->reviews_avg_rating ? number_format($wishlist->product->reviews_avg_rating, 1) : '0.0' }}
                                 </span>
-                                <span class="price">{{ number_format($product->min_price, 0, ',', '.') }}đ</span>
-                                <!-- <div class="d-flex align-items-center justify-content-between">
-                                    <div class="input-group product-qty">
-                                        <span class="input-group-btn">
-                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
-                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                            </button>
-                                        </span>
-                                        <input type="text" name="quantity" class="form-control input-number" value="1" min="1">
-                                        <span class="input-group-btn">
-                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
-                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                            </button>
-                                        </span>
-                                    </div>
-                                    <a href="#" class="nav-link">
-                                        <iconify-icon icon="uil:shopping-cart"></iconify-icon>
-                                    </a>
-                                </div> -->
+                                <span class="price">{{ number_format($wishlist->product->min_price, 0, ',', '.') }}đ</span>
                             </div>
                         </div>
-                    @empty
-                        <div class="col-12">
-                            <div class="text-center py-5">
-                                <p class="text-muted fs-5">Không tìm thấy sản phẩm nào</p>
-                            </div>
-                        </div>
-                    @endforelse
+                    @endforeach
                 </div>
 
                 <!-- Pagination -->
-                @if ($products->hasPages())
+                @if ($wishlists->hasPages())
                 <div class="mt-5">
                     <nav>
-                        {{ $products->onEachSide(1)->appends(request()->query())->links('vendor.pagination.custom') }}
+                        {{ $wishlists->onEachSide(1)->appends(request()->query())->links('vendor.pagination.custom') }}
                     </nav>
+                </div>
+                @endif
+
+                @else
+                <div class="text-center py-5">
+                    <svg width="120" height="120" class="text-muted mb-3">
+                        <use xlink:href="#heart"></use>
+                    </svg>
+                    <h4 class="text-muted mb-3">Không tìm thấy sản phẩm nào</h4>
+                    <p class="text-muted mb-4">Thử thay đổi bộ lọc hoặc tìm kiếm khác!</p>
+                    <a href="{{ route('wishlist.index') }}" class="btn btn-outline-secondary me-2">Xóa bộ lọc</a>
+                    <a href="{{ route('products.index') }}" class="btn btn-primary">
+                        Khám phá sản phẩm
+                    </a>
                 </div>
                 @endif
             </div>
@@ -274,52 +243,6 @@ $(document).ready(function() {
         if (url) {
             window.location.href = url;
         }
-    });
-    
-    // Handle wishlist toggle
-    $('.wishlist-toggle').click(function(e) {
-        e.preventDefault();
-        
-        const $btn = $(this);
-        const productId = $btn.data('product-id');
-        const isInWishlist = $btn.data('in-wishlist') === 'true' || $btn.data('in-wishlist') === true;
-        
-        $.ajax({
-            url: `/wishlist/toggle/${productId}`,
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Update button state
-                    $btn.data('in-wishlist', response.in_wishlist);
-                    $btn.attr('data-in-wishlist', response.in_wishlist);
-                    
-                    // Update tooltip
-                    $btn.attr('title', response.in_wishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích');
-                    
-                    // Update wishlist count in header
-                    if (response.count > 0) {
-                        if ($('.wishlist-count').length === 0) {
-                            $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">' + response.count + '</span>');
-                        } else {
-                            $('.wishlist-count').text(response.count).show();
-                        }
-                    } else {
-                        $('.wishlist-count').remove();
-                    }
-                }
-            },
-            error: function(xhr) {
-                if (xhr.status === 401) {
-                    alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
-                    window.location.href = '{{ route("login.form") }}';
-                } else {
-                    alert('Có lỗi xảy ra, vui lòng thử lại');
-                }
-            }
-        });
     });
 });
 </script>

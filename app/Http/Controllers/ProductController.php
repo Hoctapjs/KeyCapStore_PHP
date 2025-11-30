@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::query()
-            ->select('id', 'title', 'slug', 'code', 'brand_id', 'stock', 'status', 'created_at')
+            ->select('id', 'title', 'slug', 'code', 'brand_id', 'price', 'stock', 'status', 'created_at')
             ->with([
                 'brand:id,name,slug',
                 'productImages' => function($query) {
@@ -143,8 +143,9 @@ class ProductController extends Controller
             ->firstOrFail();
 
         // Get related products (same category) - optimized
-        $relatedProducts = Product::select('id', 'title', 'slug', 'stock')
+        $relatedProducts = Product::select('id', 'title', 'slug', 'price', 'stock', 'brand_id')
             ->with([
+                'brand:id,name',
                 'productImages' => function($query) {
                     $query->select('id', 'product_id', 'image_url')->orderBy('sort_order')->limit(1);
                 },

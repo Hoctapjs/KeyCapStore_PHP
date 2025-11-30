@@ -13,15 +13,12 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
+use App\Http\Controllers\Admin\ProductVariantController as AdminProductVariantController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\WishlistController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [ProductController::class, 'index'])->name('home');
 
 Route::get('/temp', [HomeController::class, 'temp'])->name('temp');
 
@@ -111,6 +108,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
 
     // Products
     Route::resource('products', AdminProductController::class);
+    
+    // Product Variants (nested resource)
+    Route::prefix('products/{product}/variants')->name('products.variants.')->group(function () {
+        Route::get('/', [AdminProductVariantController::class, 'index'])->name('index');
+        Route::get('/create', [AdminProductVariantController::class, 'create'])->name('create');
+        Route::post('/', [AdminProductVariantController::class, 'store'])->name('store');
+        Route::get('/{variant}/edit', [AdminProductVariantController::class, 'edit'])->name('edit');
+        Route::put('/{variant}', [AdminProductVariantController::class, 'update'])->name('update');
+        Route::delete('/{variant}', [AdminProductVariantController::class, 'destroy'])->name('destroy');
+    });
 
     // Categories
     Route::resource('categories', AdminCategoryController::class);
@@ -120,7 +127,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
 
     // Inventory Management
     Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
-    Route::post('inventory/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
+    Route::post('inventory/adjust-variant', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust-variant');
     Route::get('inventory/{product}', [AdminInventoryController::class, 'show'])->name('inventory.show');
     Route::post('inventory/{product}/update-stock', [AdminInventoryController::class, 'updateStock'])->name('inventory.update-stock');
     Route::post('inventory/variant/{variant}/update-stock', [AdminInventoryController::class, 'updateVariantStock'])->name('inventory.update-variant-stock');
@@ -148,8 +155,17 @@ Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.
 // Ajax cart info
 Route::get('/cart/ajax/info', [CartController::class, 'ajaxCartInfo'])->name('cart.ajax.info');
 
-
 Route::get('/cart/ajax/table', [CartController::class, 'ajaxTable']);
+
+// Wishlist routes
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+});
+Route::get('/wishlist/count', [WishlistController::class, 'count'])->name('wishlist.count');
+
+// Checkout
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');

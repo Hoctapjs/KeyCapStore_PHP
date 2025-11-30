@@ -21,11 +21,107 @@
         text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
     }
 
+    /* Product images */
+    .product-preview {
+        margin-bottom: 1rem;
+        width: 100%;
+        max-width: 600px;
+        height: 550px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .product-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    @media screen and (min-width: 992px) {
+        .product-thumbnail-slider {
+            height: 100px;
+        }
+    }
+
+    .product-thumbnail-slider {
+        position: relative;
+        overflow: hidden;
+        
+    }
+
+    .thumbnail-container {
+        display: flex;
+        gap: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .thumbnail-item {
+        flex: 0 0 auto;
+        width: 100px;
+    }
+
+    .thumbnail-item img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        border-radius: 0.25rem;
+    }
+
+    .thumbnail-item img:hover,
+    .thumbnail-item img.active {
+        border-color: #0d6efd;
+        transform: scale(1.05);
+    }
+
+    .thumbnail-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+    }
+
+    .thumbnail-nav:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .thumbnail-nav-prev {
+        left: 0;
+    }
+
+    .thumbnail-nav-next {
+        right: 0;
+    }
+
+    .thumbnail-nav:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
     /* Related products styling */
     .product-item {
         height: 100%;
         display: flex;
         flex-direction: column;
+        cursor: pointer;
+        position: relative;
     }
 
     .product-item figure {
@@ -42,12 +138,47 @@
     .product-item .price {
         margin-top: auto;
     }
+    
+    /* Wishlist button styles */
+    .btn-wishlist {
+        z-index: 10;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-wishlist:hover {
+        background-color: #fff;
+        transform: scale(1.1);
+    }
+    .btn-wishlist[data-in-wishlist="true"] {
+        background-color: #dc3545;
+    }
+
+    .btn-wishlist[data-in-wishlist="true"] svg {
+        fill: #dc3545;
+        stroke: #dc3545;
+    }
+    .btn-wishlist[data-in-wishlist="false"] svg {
+        fill: none;
+        stroke: #333;
+    }
+    .btn-wishlist[data-in-wishlist="false"]:hover svg {
+        fill: #dc3545;
+        stroke: #dc3545;
+    }
 </style>
 @endpush
 
 @section('content')
 
-<section class="py-5">
+<section class="py-4">
     <div class="container-fluid">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
@@ -61,25 +192,35 @@
             </ol>
         </nav>
 
-        <div class="row g-5">
+        <div class="row g-4">
             <!-- Product Images -->
             <div class="col-md-6">
-                <div class="product-preview mb-3">
-                    <img id="mainProductImage" src="{{ $product->productImages->first()->image_url ?? asset('images/placeholder.png') }}"
-                        alt="{{ $product->title }}" class="img-fluid rounded">
+                <div class="product-preview">
+                    <img id="mainProductImage" src="{{ $product->productImages->first()->image_url ?? asset('images/placeholder.svg') }}"
+                        alt="{{ $product->title }}">
                 </div>
 
                 @if($product->productImages->count() > 1)
-                <div class="product-thumbnail-slider">
-                    <div class="row g-2">
-                        @foreach($product->productImages as $image)
-                        <div class="col-3">
-                            <img src="{{ $image->image_url }}" alt="{{ $image->alt }}"
-                                class="img-fluid rounded cursor-pointer border hover-shadow"
-                                onclick="document.getElementById('mainProductImage').src='{{ $image->image_url }}'"
-                                style="cursor: pointer;">
+                <div class="product-thumbnail-slider mt-3">
+                    <button class="thumbnail-nav thumbnail-nav-prev" id="thumbPrev" onclick="scrollThumbnails(-1)">
+                        ‹
+                    </button>
+                    <button class="thumbnail-nav thumbnail-nav-next" id="thumbNext" onclick="scrollThumbnails(1)">
+                        ›
+                    </button>
+                    <div style="overflow: hidden; padding: 0 35px; height: 110px;">
+                        <div class="thumbnail-container" id="thumbnailContainer">
+                            @foreach($product->productImages as $index => $image)
+                            <div class="thumbnail-item">
+                                <img src="{{ $image->image_url }}" 
+                                     alt="{{ $image->alt }}"
+                                     class="rounded {{ $index === 0 ? 'active' : '' }}"
+                                     data-index="{{ $index }}"
+                                     data-image-url="{{ $image->image_url }}"
+                                     onclick="changeMainImage(this.dataset.imageUrl, this.dataset.index)">
+                            </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
                 </div>
                 @endif
@@ -154,32 +295,42 @@
                     // Group variants by size and color
                     $sizes = [];
                     $colorsBySize = [];
+                    $colorsOnly = [];
+                    
                     foreach($product->variants as $variant) {
-                    $options = json_decode($variant->option_values, true);
-                    $size = $options['size'] ?? null;
-                    $color = $options['color'] ?? null;
+                        $options = is_array($variant->option_values) ? $variant->option_values : [];
+                        $size = $options['size'] ?? null;
+                        $color = $options['color'] ?? null;
 
-                    if($size && !in_array($size, $sizes)) {
-                    $sizes[] = $size;
-                    }
-                    if($size && $color) {
-                    if(!isset($colorsBySize[$size])) {
-                    $colorsBySize[$size] = [];
-                    }
-                    $colorsBySize[$size][] = [
-                    'color' => $color,
-                    'variant_id' => $variant->id,
-                    'price' => $variant->price,
-                    'stock' => $variant->stock_quantity
-                    ];
-                    }
+                        if($size && !in_array($size, $sizes)) {
+                            $sizes[] = $size;
+                        }
+                        
+                        if($size && $color) {
+                            if(!isset($colorsBySize[$size])) {
+                                $colorsBySize[$size] = [];
+                            }
+                            $colorsBySize[$size][] = [
+                                'color' => $color,
+                                'variant_id' => $variant->id,
+                                'price' => $variant->price,
+                                'stock' => $variant->stock_quantity
+                            ];
+                        } elseif (!$size && $color) {
+                            // Chỉ có màu, không có size
+                            $colorsOnly[] = [
+                                'color' => $color,
+                                'variant_id' => $variant->id,
+                                'price' => $variant->price,
+                                'stock' => $variant->stock_quantity
+                            ];
+                        }
                     }
                     @endphp
 
                     <div class="mb-4">
-                        <!-- <input type="hidden" id="selected-variant-id" name="variant_id"> -->
-
-                        <!-- Size Selection -->
+                        <!-- Size Selection (chỉ hiện khi có sizes) -->
+                        @if(count($sizes) > 0)
                         <div class="mb-3">
                             <h5 class="mb-3">Chọn kích thước:</h5>
                             <div class="d-flex gap-2 flex-wrap" id="size-options">
@@ -191,17 +342,49 @@
                             </div>
                         </div>
 
-                        <!-- Color Selection -->
-                        <div class="mb-3" id="color-selection" style="display: none;">
+                        <!-- Color Selection (hiện khi chọn size hoặc khi chỉ có màu) -->
+                        <div class="mb-3" id="color-selection" @if(count($colorsOnly) == 0) style="display: none;" @endif>
                             <h5 class="mb-3">Chọn màu sắc:</h5>
                             <div id="color-options" class="d-flex gap-2 flex-wrap">
-                                <!-- Colors will be populated by JavaScript -->
+                                @if(count($colorsOnly) > 0)
+                                    @foreach($colorsOnly as $colorData)
+                                    <button type="button" class="btn btn-outline-secondary color-option {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
+                                            data-variant-id="{{ $colorData['variant_id'] }}"
+                                            data-price="{{ $colorData['price'] }}"
+                                            data-stock="{{ $colorData['stock'] }}"
+                                            {{ $colorData['stock'] <= 0 ? 'disabled' : '' }}>
+                                        {{ $colorData['color'] }}
+                                        <small class="d-block">{{ number_format($colorData['price'], 0, ',', '.') }}đ</small>
+                                    </button>
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
+                        @else
+                        <!-- Chỉ có màu sắc, không có size -->
+                        <div class="mb-3">
+                            <h5 class="mb-3">Chọn màu sắc:</h5>
+                            <div id="color-options" class="d-flex gap-2 flex-wrap">
+                                @foreach($colorsOnly as $colorData)
+                                <button type="button" class="btn btn-outline-secondary color-option {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
+                                        data-variant-id="{{ $colorData['variant_id'] }}"
+                                        data-price="{{ $colorData['price'] }}"
+                                        data-stock="{{ $colorData['stock'] }}"
+                                        {{ $colorData['stock'] <= 0 ? 'disabled' : '' }}>
+                                    {{ $colorData['color'] }}
+                                    <small class="d-block">{{ number_format($colorData['price'], 0, ',', '.') }}đ</small>
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- Hidden data for JavaScript -->
                         <script id="variants-data" type="application/json">
                             @json($colorsBySize)
+                        </script>
+                        <script id="colors-only-data" type="application/json">
+                            @json($colorsOnly)
                         </script>
                     </div>
                     @endif
@@ -310,10 +493,10 @@
             </div>
 
             <!-- Product Description & Specs -->
-            <div class="row mt-5">
+            <div class="row mt-4">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-body p-5">
+                        <div class="card-body p-4">
                             <h3 class="mb-4">Mô tả sản phẩm</h3>
                             <div class="product-description">
                                 {!! nl2br(e($product->description)) !!}
@@ -336,10 +519,10 @@
             </div>
 
             <!-- Reviews -->
-            <div class="row mt-5">
+            <div class="row mt-4">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-body p-5">
+                        <div class="card-body p-4">
                             <h3 class="mb-4">Đánh giá sản phẩm</h3>
                             @forelse($product->reviews as $review)
                             <div class="border-bottom pb-4 mb-4">
@@ -369,30 +552,36 @@
 
                 <!-- Related Products -->
                 @if($relatedProducts->count() > 0)
-                <div class="row mt-5">
+                <div class="row mt-4">
                     <div class="col-12">
                         <h3 class="mb-4">Sản phẩm liên quan</h3>
                         <div class="product-grid row row-cols-2 row-cols-md-4 row-cols-lg-5 g-4">
                             @foreach($relatedProducts as $related)
                             <div class="col">
-                                <div class="product-item">
-                                    <a href="#" class="btn-wishlist">
+                                <div class="product-item" data-url="{{ route('products.show', $related->slug) }}">
+                                    @php
+                                        $isInWishlist = auth()->check() && auth()->user()->wishlistProducts->contains($related->id);
+                                    @endphp
+                                    <a href="javascript:void(0)" 
+                                       class="btn-wishlist wishlist-toggle" 
+                                       data-product-id="{{ $related->id }}"
+                                       data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
+                                       title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}"
+                                       onclick="event.stopPropagation();">
                                         <svg width="24" height="24">
                                             <use xlink:href="#heart"></use>
                                         </svg>
                                     </a>
                                     <figure>
-                                        <a href="{{ route('products.show', $related->slug) }}" title="{{ $related->title }}">
                                             @if($related->productImages->first())
                                             <img src="{{ $related->productImages->first()->image_url }}"
-                                                alt="{{ $related->title }}" class="tab-image"
-                                                style="width: 100%; height: 250px; object-fit: cover;">
+                                                 alt="{{ $related->title }}" class="tab-image"
+                                                 style="width: 100%; height: 200px; object-fit: cover;">
                                             @else
-                                            <img src="{{ asset('images/placeholder.png') }}"
-                                                alt="{{ $related->title }}" class="tab-image"
-                                                style="width: 100%; height: 250px; object-fit: cover;">
+                                            <img src="{{ asset('images/placeholder.svg') }}"
+                                                 alt="{{ $related->title }}" class="tab-image"
+                                                 style="width: 100%; height: 200px; object-fit: contain; background: #f8f8f8;">
                                             @endif
-                                        </a>
                                     </figure>
                                     <h3>{{ Str::limit($related->title, 30) }}</h3>
                                     @if($related->brand)
@@ -414,9 +603,113 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
+        // Handle product card click for related products
+        $('.product-item').click(function() {
+            var url = $(this).data('url');
+            if (url) {
+                window.location.href = url;
+            }
+        });
+        
+        // Wishlist toggle functionality
+        $(document).on('click', '.wishlist-toggle', function(e) {
+            e.preventDefault();
+            
+            const $btn = $(this);
+            const productId = $btn.data('product-id');
+            const isInWishlist = $btn.data('in-wishlist') === 'true' || $btn.data('in-wishlist') === true;
+            
+            $.ajax({
+                url: `/wishlist/toggle/${productId}`,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update button state
+                        $btn.data('in-wishlist', response.in_wishlist);
+                        $btn.attr('data-in-wishlist', response.in_wishlist);
+                        
+                        // Update tooltip
+                        $btn.attr('title', response.in_wishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích');
+                        
+                        // Update wishlist count in header
+                        if (response.count > 0) {
+                            if ($('.wishlist-count').length === 0) {
+                                $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">' + response.count + '</span>');
+                            } else {
+                                $('.wishlist-count').text(response.count).show();
+                            }
+                        } else {
+                            $('.wishlist-count').remove();
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
+                        window.location.href = '{{ route("login.form") }}';
+                    } else {
+                        alert('Có lỗi xảy ra, vui lòng thử lại');
+                    }
+                }
+            });
+        });
+        
         // Load variants data
-        const variantsData = JSON.parse($('#variants-data').text());
+        const variantsData = JSON.parse($('#variants-data').text() || '{}');
+        const colorsOnlyData = JSON.parse($('#colors-only-data').text() || '[]');
         let selectedSize = null;
+
+        // Function to bind color click
+        function bindColorClick() {
+            $('.color-option').click(function() {
+                const stock = $(this).data('stock');
+
+                if (stock > 0) {
+                    // Update UI chọn màu
+                    $('.color-option').removeClass('btn-secondary').addClass('btn-outline-secondary');
+                    $(this).removeClass('btn-outline-secondary').addClass('btn-secondary');
+
+                    // Cập nhật variant_id trong form
+                    $('#addToCartForm input[name="variant_id"]').val($(this).data('variant-id'));
+
+                    // Cập nhật giá
+                    const price = $(this).data('price');
+                    const formattedPrice = new Intl.NumberFormat('vi-VN').format(price);
+                    $('.product-price').html(formattedPrice + 'đ');
+
+                    // Cập nhật max quantity
+                    $('.input-number').attr('max', stock);
+                    if (parseInt($('.input-number').val()) > stock) {
+                        $('.input-number').val(stock);
+                    }
+
+                    // Cập nhật badge tồn kho
+                    $('#stock-status').html(`
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            Còn ${stock} sản phẩm
+                        </span>
+                    `);
+
+                    // Đảm bảo input + nút +/- dùng được
+                    $('.input-number, .quantity-right-plus, .quantity-left-minus').prop('disabled', false);
+                } else {
+                    $('#stock-status').html(`
+                        <span class="badge bg-danger fs-6 px-3 py-2 fw-bold">
+                            Hết hàng
+                        </span>
+                    `);
+                    $('.input-number, .quantity-right-plus, .quantity-left-minus').prop('disabled', true);
+                }
+            });
+        }
+
+        // Nếu chỉ có màu sắc (không có size), bind click cho color options ngay
+        if (colorsOnlyData.length > 0 && Object.keys(variantsData).length === 0) {
+            bindColorClick();
+        }
 
         // Size selection
         $('.size-option').click(function() {
@@ -453,47 +746,7 @@
             $('#selected-variant-id').val('');
 
             // Re-bind color click event
-            $('.color-option').click(function() {
-                const stock = $(this).data('stock');
-
-                if (stock > 0) {
-                    // Update UI chọn màu
-                    $('.color-option').removeClass('btn-secondary').addClass('btn-outline-secondary');
-                    $(this).removeClass('btn-outline-secondary').addClass('btn-secondary');
-
-                    // Cập nhật variant_id trong form
-                    $('#addToCartForm input[name="variant_id"]').val($(this).data('variant-id'));
-
-                    // Cập nhật giá
-                    const price = $(this).data('price');
-                    const formattedPrice = new Intl.NumberFormat('vi-VN').format(price);
-                    $('.product-price').html(formattedPrice + 'đ');
-
-                    // Cập nhật max quantity
-                    $('.input-number').attr('max', stock);
-                    if (parseInt($('.input-number').val()) > stock) {
-                        $('.input-number').val(stock);
-                    }
-
-                    // Cập nhật badge tồn kho
-                    $('#stock-status').html(`
-            <span class="badge bg-success fs-6 px-3 py-2">
-                Còn ${stock} sản phẩm
-            </span>
-        `);
-
-                    // Đảm bảo input + nút +/- dùng được
-                    $('.input-number, .quantity-right-plus, .quantity-left-minus').prop('disabled', false);
-                } else {
-                    // Trường hợp muốn allow click variant hết hàng (nếu bạn không disabled button)
-                    $('#stock-status').html(`
-            <span class="badge bg-danger fs-6 px-3 py-2 fw-bold">
-                Hết hàng
-            </span>
-        `);
-                    $('.input-number, .quantity-right-plus, .quantity-left-minus').prop('disabled', true);
-                }
-            });
+            bindColorClick();
         });
 
         // Quantity buttons
@@ -513,6 +766,55 @@
                 $('.input-number').val(quantity - 1);
             }
         });
+    });
+
+    // Thumbnail slider functions
+    let currentScrollPosition = 0;
+    const scrollAmount = 110; // thumbnail width + gap
+
+    function changeMainImage(imageUrl, index) {
+        document.getElementById('mainProductImage').src = imageUrl;
+        
+        // Update active state
+        document.querySelectorAll('.thumbnail-item img').forEach(img => {
+            img.classList.remove('active');
+        });
+        document.querySelector(`.thumbnail-item img[data-index="${index}"]`).classList.add('active');
+    }
+
+    function scrollThumbnails(direction) {
+        const container = document.getElementById('thumbnailContainer');
+        const maxScroll = container.scrollWidth - container.parentElement.offsetWidth;
+        
+        currentScrollPosition += direction * scrollAmount;
+        
+        // Limit scroll position
+        if (currentScrollPosition < 0) currentScrollPosition = 0;
+        if (currentScrollPosition > maxScroll) currentScrollPosition = maxScroll;
+        
+        container.style.transform = `translateX(-${currentScrollPosition}px)`;
+        
+        // Update button states
+        updateNavButtons(maxScroll);
+    }
+
+    function updateNavButtons(maxScroll) {
+        const prevBtn = document.getElementById('thumbPrev');
+        const nextBtn = document.getElementById('thumbNext');
+        
+        if (prevBtn && nextBtn) {
+            prevBtn.disabled = currentScrollPosition <= 0;
+            nextBtn.disabled = currentScrollPosition >= maxScroll;
+        }
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('thumbnailContainer');
+        if (container) {
+            const maxScroll = container.scrollWidth - container.parentElement.offsetWidth;
+            updateNavButtons(maxScroll);
+        }
     });
 </script>
 @endpush

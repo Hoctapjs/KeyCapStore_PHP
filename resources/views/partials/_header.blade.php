@@ -4,7 +4,7 @@
 
             <div class="col-sm-4 col-lg-3 text-center text-sm-start">
                 <div class="main-logo">
-                    <a href="index.html">
+                    <a href="{{ route('home') }}">
                         <!-- <img src="images/logo.png" alt="logo" class="img-fluid"> -->
                         <img src="{{ asset('images/logo.png') }}" alt="logo" class="img-fluid">
                     </a>
@@ -108,10 +108,20 @@
                         </ul>
                     </li>
                     <li>
-                        <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                        <a href="{{ route('wishlist.index') }}" class="rounded-circle bg-light p-2 mx-1 position-relative" title="Danh sách yêu thích">
                             <svg width="24" height="24" viewBox="0 0 24 24">
                                 <use xlink:href="#heart"></use>
                             </svg>
+                            @auth
+                            @php
+                                $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
+                            @endphp
+                            @if($wishlistCount > 0)
+                            <span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                {{ $wishlistCount }}
+                            </span>
+                            @endif
+                            @endauth
                         </a>
                     </li>
                     <li class="d-lg-none">

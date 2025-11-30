@@ -80,6 +80,28 @@
                 $(".cart-total").text(data.cartTotal);
                 $("#offcanvasCart .badge").text(data.cartCount);
 
+                // ... rest of cart update code
+            });
+        }
+
+        // Update wishlist count
+        function updateWishlistCount() {
+            $.get("{{ route('wishlist.count') }}", function(data) {
+                $('.wishlist-count').text(data.count);
+                if (data.count > 0) {
+                    $('.wishlist-count').show();
+                } else {
+                    $('.wishlist-count').hide();
+                }
+            });
+        }
+
+        // Load wishlist count on page load
+        $(document).ready(function() {
+            updateWishlistCount();
+        });
+    </script>
+
                 // build HTML item trong offcanvas
                 let html = "";
                 if (data.items.length === 0) {

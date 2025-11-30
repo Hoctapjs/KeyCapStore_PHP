@@ -13,46 +13,50 @@ class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['brand', 'productImages']);
+        // Hiển thị danh sách variants để quản lý tồn kho
+        $query = ProductVariant::with(['product.brand', 'product.productImages']);
 
         // Filter by stock status
         if ($request->has('stock_status') && $request->stock_status !== '') {
             $status = $request->stock_status;
             if ($status == 'out') {
-                $query->where('stock', '=', 0);
+                $query->where('stock_quantity', '=', 0);
             } elseif ($status == 'low') {
-                $query->where('stock', '>', 0)->where('stock', '<=', 10);
+                $query->where('stock_quantity', '>', 0)->where('stock_quantity', '<=', 10);
             } elseif ($status == 'sufficient') {
-                $query->where('stock', '>', 10);
+                $query->where('stock_quantity', '>', 10);
             }
         }
 
-        // Search
+        // Search by product title or variant SKU
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                $q->where('sku', 'like', "%{$search}%")
+                  ->orWhereHas('product', function($productQuery) use ($search) {
+                      $productQuery->where('title', 'like', "%{$search}%")
+                                   ->orWhere('code', 'like', "%{$search}%");
+                  });
             });
         }
 
-        $products = $query->orderBy('stock', 'asc')->paginate(20);
+        $variants = $query->orderBy('stock_quantity', 'asc')->paginate(20);
 
-        // Statistics
+        // Statistics từ variants
         $stats = [
-            'sufficient' => Product::where('stock', '>', 10)->count(),
-            'low' => Product::where('stock', '>', 0)->where('stock', '<=', 10)->count(),
-            'out' => Product::where('stock', '=', 0)->count(),
-            'total_value' => Product::selectRaw('SUM(stock * price) as total')->value('total') ?? 0,
+            'sufficient' => ProductVariant::where('stock_quantity', '>', 10)->count(),
+            'low' => ProductVariant::where('stock_quantity', '>', 0)->where('stock_quantity', '<=', 10)->count(),
+            'out' => ProductVariant::where('stock_quantity', '=', 0)->count(),
+            'total_value' => ProductVariant::selectRaw('SUM(stock_quantity * price) as total')->value('total') ?? 0,
         ];
 
-        return view('admin.inventory.index', compact('products', 'stats'));
+        return view('admin.inventory.index', compact('variants', 'stats'));
     }
 
     public function adjust(Request $request)
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'variant_id' => 'required|exists:product_variants,id',
             'type' => 'required|in:in,out',
             'quantity' => 'required|integer|min:1',
             'note' => 'nullable|string|max:500',
@@ -60,21 +64,21 @@ class InventoryController extends Controller
 
         DB::beginTransaction();
         try {
-            $product = Product::findOrFail($validated['product_id']);
+            $variant = ProductVariant::findOrFail($validated['variant_id']);
             
             $changeQty = $validated['type'] == 'in' ? $validated['quantity'] : -$validated['quantity'];
-            $product->stock += $changeQty;
+            $variant->stock_quantity += $changeQty;
             
-            if ($product->stock < 0) {
+            if ($variant->stock_quantity < 0) {
                 throw new \Exception('Số lượng tồn kho không được âm');
             }
             
-            $product->save();
+            $variant->save();
 
             // Create inventory movement
             InventoryMovement::create([
-                'product_id' => $product->id,
-                'variant_id' => null,
+                'product_id' => $variant->product_id,
+                'variant_id' => $variant->id,
                 'change_qty' => $changeQty,
                 'reason' => 'manual',
                 'note' => $validated['note'] ?? null,
