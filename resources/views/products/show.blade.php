@@ -241,15 +241,15 @@
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="text-warning">
                         @for($i = 1; $i <= 5; $i++)
-                            @if($reviewsCount> 0 && $i <= round($avgRating))
+                            @if($totalReviews > 0 && $i <= round($avgRating))
                                 ★
                                 @else
                                 ☆
                                 @endif
                                 @endfor
                                 </div>
-                                <span class="fw-semibold">{{ $reviewsCount > 0 ? number_format($avgRating, 1) : '0.0' }}</span>
-                                <span class="text-muted">({{ $reviewsCount }} đánh giá)</span>
+                                <span class="fw-semibold">{{ $totalReviews > 0 ? number_format($avgRating, 1) : '0.0' }}</span>
+                                <span class="text-muted">({{ $totalReviews }} đánh giá)</span>
                     </div>
 
                     <!-- Price -->
