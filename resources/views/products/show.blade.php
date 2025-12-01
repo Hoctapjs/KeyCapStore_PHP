@@ -523,32 +523,115 @@
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h3 class="mb-4">Đánh giá sản phẩm</h3>
-                            @forelse($product->reviews as $review)
-                            <div class="border-bottom pb-4 mb-4">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="mb-1">{{ $review->user->name }}</h6>
-                                        <div class="text-warning">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                {{ $i <= $review->rating ? '★' : '☆' }}
-                                                @endfor
-                                                </div>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="mb-0">Đánh giá sản phẩm</h3>
+                                @auth
+                                    <a href="{{ route('review.create', $product->id) }}" class="btn btn-primary">
+                                        <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
+                                    </a>
+                                @else
+                                    <a href="{{ route('login.form') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-pencil-square me-2"></i>Đăng nhập để đánh giá
+                                    </a>
+                                @endauth
+                            </div>
+
+                            <!-- Rating Summary + Filter -->
+                            <div class="row mb-4">
+                                <div class="col-lg-4 text-center text-lg-start mb-4 mb-lg-0">
+                                    <div class="bg-light rounded-3 p-4">
+                                            <!-- Avg Rating -->
+                                        <div class="d-flex align-items-baseline justify-content-center justify-content-lg-start mb-2">
+                                            <span class="display-3 fw-bold text-warning me-2">★ {{ number_format($avgRating, 1) }}</span>
+                                            <span class="fs-5 text-muted">/ 5</span>
                                         </div>
-                                        <span class="text-muted small">{{ $review->created_at->format('d/m/Y') }}</span>
+
+                                        <!-- Stars -->
+                                        <div class="text-warning fs-3 mb-2">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="bi {{ $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }}"></i>
+                                            @endfor
+                                        </div>
+
+                                        <!-- Total reviews -->
+                                        <div class="text-muted">{{ $totalReviews }} đánh giá</div>
                                     </div>
-                                    @if($review->title)
-                                    <h6 class="mb-2">{{ $review->title }}</h6>
-                                    @endif
-                                    <p class="mb-0">{{ $review->content }}</p>
                                 </div>
+
+                                <div class="col-lg-8">
+                                    <div class="d-flex flex-column gap-2">
+                                        @for($i = 5; $i >= 1; $i--)
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="text-warning" style="width: 100px;">
+                                                    {{ $i }} <i class="bi bi-star-fill"></i>
+                                                </div>
+                                                <div class="progress flex-grow-1" style="height: 10px;">
+                                                    @php
+                                                        $barWidth = $totalReviews > 0
+                                                            ? round(($ratingStats[$i] / $totalReviews) * 100, 2)
+                                                            : 0;
+                                                    @endphp
+                                                    <div class="progress-bar bg-warning" style="width: {{ $barWidth }}%;"></div>
+                                                </div>
+                                                <div class="text-muted text-end" style="width: 50px;">{{ $ratingStats[$i] }}</div>
+                                            </div>
+                                        @endfor
+                                    </div>
+
+                                    <!-- Filter by star -->
+                                    <div class="mt-4 d-flex flex-wrap gap-2">
+                                        <a href="{{ route('products.show', $product->slug) }}"
+                                        class="btn {{ !request('rating') || request('rating') == 'all' ? 'btn-warning' : 'btn-outline-warning' }} btn-sm px-3">
+                                            Tất cả ({{ $totalReviews }})
+                                        </a>
+                                        @for($i = 5; $i >= 1; $i--)
+                                            <a href="{{ route('products.show', $product->slug) . '?rating=' . $i }}"
+                                            class="btn {{ request('rating') == $i ? 'btn-warning' : 'btn-outline-warning' }} btn-sm px-3">
+                                                {{ $i }} Star ({{ $ratingStats[$i] }})
+                                            </a>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reviews List with Pagination -->
+                            <div class="reviews-list">
+                                @forelse($reviews as $review)
+                                    <div class="border-bottom pb-4 mb-4">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <strong>{{ $review->user->name }}</strong>
+                                                <div class="text-warning d-inline-block ms-2">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        {{ $i <= $review->rating ? '★' : '☆' }}
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">{{ $review->created_at->format('d/m/Y') }}</small>
+                                        </div>
+                                        @if($review->title)
+                                            <h6 class="fw-bold text-primary mb-1">{{ $review->title }}</h6>
+                                        @endif
+                                        <p class="mb-0 text-dark">{{ $review->content }}</p>
+                                    </div>
                                 @empty
-                                <p class="text-muted">Chưa có đánh giá nào</p>
+                                    <div class="text-center py-5 text-muted">
+                                        <i class="bi bi-chat-square-text fs-1 d-block mb-3"></i>
+                                        <p class="fs-5">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                    </div>
                                 @endforelse
                             </div>
+
+                            <!-- Pagination - chỉ hiện nếu có nhiều hơn 1 trang -->
+                            @if($reviews->hasPages())
+                                <div class="mt-4">
+                                    {{ $reviews->withQueryString()->links('vendor.pagination.bootstrap-5') }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
+            </div>
 
                 <!-- Related Products -->
                 @if($relatedProducts->count() > 0)
