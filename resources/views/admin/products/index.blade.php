@@ -109,11 +109,11 @@
                         <td>
                             <a href="{{ route('admin.products.variants.index', $product->id) }}" 
                                class="btn btn-info btn-sm mb-2 w-100" title="Quản lý biến thể">
-                                <i class="bi bi-grid-3x3"></i> Biến thể ({{ $product->variants->count() }})
+                                <i class="bi bi-grid-3x3-gap-fill"></i> ({{ $product->variants->count() }})
                             </a>
                             <div class="d-flex gap-1">
                                 <a href="{{ route('admin.products.edit', $product->id) }}" 
-                                   class="btn btn-warning btn-sm flex-fill" title="Sửa sản phẩm">
+                                   class="btn btn-warning btn-sm flex-fill" title="Sửa">
                                     <i class="bi bi-pencil-fill"></i>
                                 </a>
                                 <form action="{{ route('admin.products.destroy', $product->id) }}" 
@@ -122,7 +122,7 @@
                                       onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa sản phẩm">
+                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa">
                                         <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </form>

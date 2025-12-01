@@ -526,9 +526,15 @@
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h3 class="mb-0">Đánh giá sản phẩm</h3>
                                 @auth
-                                    <a href="{{ route('review.create', $product->id) }}" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
-                                    </a>
+                                    @if($userReview)
+                                        <a href="{{ route('review.edit', ['product' => $product->id, 'review' => $userReview->id]) }}" class="btn btn-warning">
+                                            <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa đánh giá của bạn
+                                        </a>
+                                    @else
+                                        <a href="{{ route('review.create', $product->id) }}" class="btn btn-primary">
+                                            <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
+                                        </a>
+                                    @endif
                                 @else
                                     <a href="{{ route('login.form') }}" class="btn btn-outline-primary">
                                         <i class="bi bi-pencil-square me-2"></i>Đăng nhập để đánh giá
@@ -571,7 +577,7 @@
                                                             ? round(($ratingStats[$i] / $totalReviews) * 100, 2)
                                                             : 0;
                                                     @endphp
-                                                    <div class="progress-bar bg-warning" style="width: {{ $barWidth }}%;"></div>
+                                                    <div class="progress-bar" style="width: {{ $barWidth }}%; background-color: #f0ad4e;"></div>
                                                 </div>
                                                 <div class="text-muted text-end" style="width: 50px;">{{ $ratingStats[$i] }}</div>
                                             </div>
@@ -720,7 +726,7 @@
                         // Update wishlist count in header
                         if (response.count > 0) {
                             if ($('.wishlist-count').length === 0) {
-                                $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">' + response.count + '</span>');
+                                $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">' + response.count + '</span>');
                             } else {
                                 $('.wishlist-count').text(response.count).show();
                             }

@@ -21,7 +21,25 @@ class BrandController extends Controller
             });
         }
 
-        $brands = $query->orderBy('name')->paginate(20);
+        // Sắp xếp
+        $sort = $request->get('sort', 'newest');
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $brands = $query->paginate(20);
 
         return view('admin.brands.index', compact('brands'));
     }
@@ -35,17 +53,11 @@ class BrandController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:brands,name',
-            'website' => 'nullable|url|max:255',
-            'logo' => 'nullable|url|max:500',
-            'description' => 'nullable|string',
         ]);
 
         $brand = new Brand();
         $brand->name = $validated['name'];
         $brand->slug = Str::slug($validated['name']);
-        $brand->website = $validated['website'] ?? null;
-        $brand->logo = $validated['logo'] ?? null;
-        $brand->description = $validated['description'] ?? null;
         $brand->save();
 
         return redirect()->route('admin.brands.index')
@@ -61,16 +73,10 @@ class BrandController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:brands,name,' . $brand->id,
-            'website' => 'nullable|url|max:255',
-            'logo' => 'nullable|url|max:500',
-            'description' => 'nullable|string',
         ]);
 
         $brand->name = $validated['name'];
         $brand->slug = Str::slug($validated['name']);
-        $brand->website = $validated['website'] ?? null;
-        $brand->logo = $validated['logo'] ?? null;
-        $brand->description = $validated['description'] ?? null;
         $brand->save();
 
         return redirect()->route('admin.brands.index')

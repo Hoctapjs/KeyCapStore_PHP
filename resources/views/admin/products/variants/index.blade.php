@@ -87,19 +87,19 @@
                         </td>
                         <td>{{ number_format($variant->price * $variant->stock_quantity, 0, ',', '.') }}đ</td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
+                            <div class="d-flex gap-1">
                                 <a href="{{ route('admin.products.variants.edit', [$product, $variant]) }}" 
-                                   class="btn btn-warning">
-                                    <i class="bi bi-pencil"></i>
+                                   class="btn btn-warning btn-sm flex-fill" title="Sửa">
+                                    <i class="bi bi-pencil-fill"></i>
                                 </a>
                                 <form action="{{ route('admin.products.variants.destroy', [$product, $variant]) }}" 
                                       method="POST" 
-                                      class="d-inline"
+                                      class="flex-fill"
                                       onsubmit="return confirm('Bạn có chắc muốn xóa biến thể này?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-trash"></i>
+                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa">
+                                        <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </form>
                             </div>

@@ -21,7 +21,25 @@ class CategoryController extends Controller
             });
         }
 
-        $categories = $query->orderBy('name')->paginate(20);
+        // Sắp xếp
+        $sort = $request->get('sort', 'newest');
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $categories = $query->paginate(20);
 
         return view('admin.categories.index', compact('categories'));
     }
@@ -37,16 +55,12 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
-            'icon' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
         ]);
 
         $category = new Category();
         $category->name = $validated['name'];
         $category->slug = Str::slug($validated['name']);
         $category->parent_id = $validated['parent_id'] ?? null;
-        $category->icon = $validated['icon'] ?? null;
-        $category->description = $validated['description'] ?? null;
         $category->save();
 
         return redirect()->route('admin.categories.index')
@@ -73,15 +87,11 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
-            'icon' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
         ]);
 
         $category->name = $validated['name'];
         $category->slug = Str::slug($validated['name']);
         $category->parent_id = $validated['parent_id'] ?? null;
-        $category->icon = $validated['icon'] ?? null;
-        $category->description = $validated['description'] ?? null;
         $category->save();
 
         return redirect()->route('admin.categories.index')

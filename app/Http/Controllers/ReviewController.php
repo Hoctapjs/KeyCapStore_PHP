@@ -68,12 +68,12 @@ class ReviewController extends Controller
             'rating' => $request->rating,
             'title' => $request->title,
             'content' => $request->content,
-            'status' => 'pending', // Default to pending for moderation
+            'status' => 'approved', // Auto-approve new reviews
         ]);
 
         return redirect()
             ->route('products.show', $product->slug)
-            ->with('success', 'Cảm ơn bạn đã đánh giá! Đánh giá của bạn sẽ được hiển thị sau khi được duyệt.');
+            ->with('success', 'Cảm ơn bạn đá đánh giá! Đánh giá của bạn đã được hiển thị.');
     }
 
     /**
@@ -113,16 +113,24 @@ class ReviewController extends Controller
             'content' => 'required|string|min:10',
         ]);
 
+        // If review was rejected, set to pending for re-approval
+        // If already approved, keep it approved
+        $newStatus = $review->status === 'rejected' ? 'pending' : 'approved';
+
         $review->update([
             'rating' => $request->rating,
             'title' => $request->title,
             'content' => $request->content,
-            'status' => 'pending', // Reset to pending after edit
+            'status' => $newStatus,
         ]);
+
+        $message = $newStatus === 'pending' 
+            ? 'Đánh giá của bạn đã được cập nhật và đang chờ duyệt lại.'
+            : 'Đánh giá của bạn đã được cập nhật!';
 
         return redirect()
             ->route('products.show', $review->product->slug)
-            ->with('success', 'Đánh giá của bạn đã được cập nhật!');
+            ->with('success', $message);
     }
 
     /**

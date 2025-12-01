@@ -1,7 +1,7 @@
-{{--  resources/views/products/review.blade.php  --}}
+{{--  resources/views/reviews/edit.blade.php  --}}
 @extends('layouts.app')
 
-@section('title', 'Viết đánh giá - ' . $product->title)
+@section('title', 'Chỉnh sửa đánh giá - ' . $review->product->title)
 
 @push('styles')
 <style>
@@ -40,8 +40,8 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('home') }}">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('products.show', $product->slug) }}">{{ Str::limit($product->title, 40) }}</a></li>
-                <li class="breadcrumb-item active">Viết đánh giá</li>
+                <li class="breadcrumb-item"><a href="{{ route('products.show', $review->product->slug) }}">{{ Str::limit($review->product->title, 40) }}</a></li>
+                <li class="breadcrumb-item active">Chỉnh sửa đánh giá</li>
             </ol>
         </nav>
 
@@ -50,15 +50,15 @@
                 <div class="card border-0 shadow-lg">
                     <div class="card-body p-5">
                         <div class="text-center mb-5">
-                            <h2 class="fw-bold">Đánh giá sản phẩm</h2>
-                            <p class="text-muted">Chia sẻ trải nghiệm của bạn để giúp người khác mua sắm tốt hơn</p>
+                            <h2 class="fw-bold">Chỉnh sửa đánh giá</h2>
+                            <p class="text-muted">Cập nhật trải nghiệm của bạn về sản phẩm</p>
                         </div>
 
                         <!-- Product Info -->
                         <div class="d-flex align-items-center gap-4 p-4 bg-white rounded shadow-sm mb-5">
-                            @if($product->productImages->first())
-                                <img src="{{ $product->productImages->first()->image_url }}"
-                                    alt="{{ $product->title }}"
+                            @if($review->product->productImages->first())
+                                <img src="{{ $review->product->productImages->first()->image_url }}"
+                                    alt="{{ $review->product->title }}"
                                     class="rounded"
                                     style="width: 100px; height: 100px; object-fit: cover;">
                             @else
@@ -68,19 +68,20 @@
                                 </div>
                             @endif
                             <div>
-                                <h5 class="mb-1">{{ $product->title }}</h5>
-                                @if($product->brand)
-                                    <p class="text-muted mb-0">Thương hiệu: {{ $product->brand->name }}</p>
+                                <h5 class="mb-1">{{ $review->product->title }}</h5>
+                                @if($review->product->brand)
+                                    <p class="text-muted mb-0">Thương hiệu: {{ $review->product->brand->name }}</p>
                                 @endif
                                 <p class="h4 fw-bold text-primary mb-0">
-                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                    {{ number_format($review->product->price, 0, ',', '.') }}đ
                                 </p>
                             </div>
                         </div>
 
                         <!-- Review Form -->
-                        <form action="{{ route('review.store', $product->id) }}" method="POST" class="review-form">
+                        <form action="{{ route('review.update', $review) }}" method="POST" class="review-form">
                             @csrf
+                            @method('PUT')
 
                             <!-- Rating -->
                             <div class="mb-4 text-center">
@@ -89,12 +90,20 @@
                                 </label>
                             <div class="star-rating d-inline-block" id="starRating">
                                 @for($i = 1; $i <= 5; $i++)
-                                    <span class="star" data-value="{{ $i }}">★</span>
+                                    <span class="star {{ $i <= $review->rating ? 'active' : '' }}" data-value="{{ $i }}">★</span>
                                 @endfor
                             </div>
-                                <input type="hidden" name="rating" id="ratingValue" value="5" required>
+                                <input type="hidden" name="rating" id="ratingValue" value="{{ old('rating', $review->rating) }}" required>
                                 <div class="mt-2">
-                                    <small id="ratingText" class="text-muted fw-bold">Rất hài lòng</small>
+                                    <small id="ratingText" class="text-muted fw-bold">
+                                        @switch($review->rating)
+                                            @case(5) Rất hài lòng @break
+                                            @case(4) Hài lòng @break
+                                            @case(3) Bình thường @break
+                                            @case(2) Không hài lòng @break
+                                            @case(1) Rất không hài lòng @break
+                                        @endswitch
+                                    </small>
                                 </div>
                             </div>
                             @error('rating')
@@ -107,7 +116,7 @@
                                     Tiêu đề đánh giá <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror"
-                                    value="{{ old('title') }}"
+                                    value="{{ old('title', $review->title) }}"
                                     placeholder="Ví dụ: Sản phẩm tuyệt vời, giao hàng nhanh!"
                                     required>
 
@@ -123,7 +132,7 @@
                                 </label>
                                 <textarea name="content" id="content" class="form-control @error('content') is-invalid @enderror"
                                         placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này... (chất lượng, đóng gói, giao hàng,...)"
-                                        required>{{ old('content') }}</textarea>
+                                        required>{{ old('content', $review->content) }}</textarea>
                                 @error('content')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -131,12 +140,12 @@
 
                             <!-- Submit -->
                             <div class="d-grid gap-3 d-md-flex justify-content-md-center">
-                                <a href="{{ route('products.show', $product->slug) }}"
+                                <a href="{{ route('products.show', $review->product->slug) }}"
                                     class="btn btn-outline-secondary btn-lg px-5">
                                     <i class="bi bi-arrow-left me-2"></i>Quay lại
                                 </a>
-                                <button type="submit" class="btn btn-primary btn-lg px-5">
-                                    <i class="bi bi-send me-2"></i>Gửi đánh giá
+                                <button type="submit" class="btn btn-warning btn-lg px-5">
+                                    <i class="bi bi-check-circle me-2"></i>Cập nhật đánh giá
                                 </button>
                             </div>
                         </form>
@@ -147,7 +156,11 @@
                 <div class="text-center mt-4">
                     <small class="text-muted">
                         <i class="bi bi-info-circle"></i>
-                        Đánh giá của bạn sẽ được hiển thị ngay lập tức.
+                        @if($review->status === 'rejected')
+                            Đánh giá của bạn sẽ được kiểm duyệt lại sau khi chỉnh sửa.
+                        @else
+                            Đánh giá của bạn sẽ được cập nhật ngay lập tức.
+                        @endif
                     </small>
                 </div>
             </div>
@@ -158,70 +171,55 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const stars = document.querySelectorAll('.star-rating .star');
-    const ratingValue = document.getElementById('ratingValue');
-    const ratingText = document.getElementById('ratingText');
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star');
+        const ratingValue = document.getElementById('ratingValue');
+        const ratingText = document.getElementById('ratingText');
+        
+        const messages = {
+            1: 'Rất không hài lòng',
+            2: 'Không hài lòng',
+            3: 'Bình thường',
+            4: 'Hài lòng',
+            5: 'Rất hài lòng'
+        };
 
-    const ratingMessages = {
-        1: 'Rất tệ',
-        2: 'Tệ',
-        3: 'Bình thường',
-        4: 'Hài lòng',
-        5: 'Rất hài lòng'
-    };
+        // Set initial state based on current rating
+        const currentRating = parseInt(ratingValue.value);
+        highlightStars(currentRating);
 
-    // Hàm cập nhật màu sao + text theo giá trị
-    function updateRatingDisplay(value) {
         stars.forEach(star => {
-            if (parseInt(star.dataset.value) <= value) {
-                star.classList.add('active');
-                star.style.color = '#ffc107';
-            } else {
-                star.classList.remove('active');
-                star.style.color = '#ddd';
-            }
+            // Hover effect
+            star.addEventListener('mouseenter', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                highlightStars(value);
+                ratingText.textContent = messages[value];
+            });
+
+            // Click to select rating
+            star.addEventListener('click', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                ratingValue.value = value;
+                ratingText.textContent = messages[value];
+            });
         });
 
-        ratingText.textContent = ratingMessages[value];
-        ratingText.className = 'fw-bold ';
-        if (value >= 4) ratingText.classList.add('text-success');
-        else if (value <= 2) ratingText.classList.add('text-primary');
-        else ratingText.classList.add('text-primary');
-    }
-
-    // Khởi tạo: mặc định 5 sao
-    let currentRating = 5;
-    ratingValue.value = 5;
-    updateRatingDisplay(currentRating);
-
-    // Khi CLICK → lưu giá trị đã chọn
-    stars.forEach(star => {
-        star.addEventListener('click', function () {
-            currentRating = parseInt(this.dataset.value);
-            ratingValue.value = currentRating;
-            updateRatingDisplay(currentRating);
+        // Reset on mouse leave
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            const selectedValue = parseInt(ratingValue.value);
+            highlightStars(selectedValue);
+            ratingText.textContent = messages[selectedValue];
         });
 
-        // Khi HOVER → tạm thời hiện text tương ứng
-        star.addEventListener('mouseover', function () {
-            const hoverValue = parseInt(this.dataset.value);
-            updateRatingDisplay(hoverValue); // hiện tạm text khi hover
-        });
+        function highlightStars(count) {
+            stars.forEach((star, index) => {
+                if (index < count) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
     });
-
-    // Khi RỜI CHUỘT khỏi khu vực sao → quay về giá trị đã chọn
-    document.getElementById('starRating').addEventListener('mouseleave', function () {
-        updateRatingDisplay(currentRating);
-    });
-
-    // Nếu có old input (lỗi validate) → khôi phục trạng thái
-    const savedRating = @json(old('rating'));
-    if (savedRating !== null) {
-        currentRating = savedRating;
-        ratingValue.value = currentRating;
-        updateRatingDisplay(currentRating);
-    }
-});
 </script>
 @endpush

@@ -41,27 +41,6 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-
-                <!-- Icon -->
-                <div class="col-md-6">
-                    <label class="form-label">Icon (Bootstrap Icons)</label>
-                    <input type="text" name="icon" value="{{ old('icon') }}" 
-                           class="form-control @error('icon') is-invalid @enderror"
-                           placeholder="vd: bi bi-laptop, bi bi-keyboard">
-                    @error('icon')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    <small class="text-muted">Xem icons tại: <a href="https://icons.getbootstrap.com/" target="_blank">Bootstrap Icons</a></small>
-                </div>
-
-                <!-- Description -->
-                <div class="col-md-12">
-                    <label class="form-label">Mô tả</label>
-                    <textarea name="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
-                    @error('description')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">

@@ -15,6 +15,35 @@
                     </a>
                 </div>
                 <div class="card-body">
+                    <!-- Filters -->
+                    <form method="GET" class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Tìm kiếm mã coupon..." value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="type" class="form-select">
+                                <option value="">Tất cả loại</option>
+                                <option value="fixed" {{ request('type') == 'fixed' ? 'selected' : '' }}>Giảm cố định</option>
+                                <option value="percent" {{ request('type') == 'percent' ? 'selected' : '' }}>Giảm %</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="sort" class="form-select">
+                                <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Mới nhất</option>
+                                <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Cũ nhất</option>
+                                <option value="value_high" {{ request('sort') == 'value_high' ? 'selected' : '' }}>Giá trị cao</option>
+                                <option value="value_low" {{ request('sort') == 'value_low' ? 'selected' : '' }}>Giá trị thấp</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="{{ route('admin.coupons.index') }}" class="btn btn-secondary w-100">Reset</a>
+                        </div>
+                    </form>
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -24,10 +53,8 @@
                                     <th>Loại</th>
                                     <th>Giá trị</th>
                                     <th>Đơn tối thiểu</th>
-                                    <th>Giảm tối đa</th>
                                     <th>Số lần sử dụng</th>
                                     <th>Hạn sử dụng</th>
-                                    <th>Trạng thái</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -51,42 +78,28 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{ $coupon->min_order_amount ? number_format($coupon->min_order_amount, 0, ',', '.') . 'đ' : 'Không' }}
+                                        {{ number_format($coupon->min_order_total ?? 0, 0, ',', '.') }}đ
                                     </td>
                                     <td>
-                                        {{ $coupon->max_discount_amount ? number_format($coupon->max_discount_amount, 0, ',', '.') . 'đ' : 'Không giới hạn' }}
+                                        {{ $coupon->max_uses ?? '∞' }}
                                     </td>
                                     <td>
-                                        {{ $coupon->used_count ?? 0 }} / {{ $coupon->usage_limit ?? '∞' }}
+                                        {{ \Carbon\Carbon::parse($coupon->starts_at)->format('d/m/Y') }} - 
+                                        {{ \Carbon\Carbon::parse($coupon->ends_at)->format('d/m/Y') }}
                                     </td>
                                     <td>
-                                        @if($coupon->valid_from && $coupon->valid_until)
-                                            {{ \Carbon\Carbon::parse($coupon->valid_from)->format('d/m/Y') }} - 
-                                            {{ \Carbon\Carbon::parse($coupon->valid_until)->format('d/m/Y') }}
-                                        @else
-                                            Không giới hạn
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($coupon->is_active)
-                                            <span class="badge bg-success">Hoạt động</span>
-                                        @else
-                                            <span class="badge bg-secondary">Tắt</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
+                                        <div class="d-flex gap-1">
                                             <a href="{{ route('admin.coupons.edit', $coupon) }}" 
-                                               class="btn btn-warning" title="Sửa">
-                                                ✎
+                                               class="btn btn-warning btn-sm flex-fill" title="Sửa">
+                                                <i class="bi bi-pencil-fill"></i>
                                             </a>
                                             <form action="{{ route('admin.coupons.destroy', $coupon) }}" 
-                                                  method="POST" class="d-inline" 
+                                                  method="POST" class="flex-fill" 
                                                   onsubmit="return confirm('Bạn có chắc muốn xóa coupon này?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger" title="Xóa">
-                                                    🗑
+                                                <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa">
+                                                    <i class="bi bi-trash-fill"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -94,7 +107,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="10" class="text-center py-4 text-muted">
+                                    <td colspan="8" class="text-center py-4 text-muted">
                                         Chưa có coupon nào. <a href="{{ route('admin.coupons.create') }}">Tạo coupon mới</a>
                                     </td>
                                 </tr>

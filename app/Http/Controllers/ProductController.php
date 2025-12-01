@@ -176,13 +176,22 @@ class ProductController extends Controller
         
         $reviews = $reviewsQuery->latest()->paginate(10);
 
+        // Check if current user has reviewed this product
+        $userReview = null;
+        if (auth()->check()) {
+            $userReview = $product->reviews()
+                ->where('user_id', auth()->id())
+                ->first();
+        }
+
         return view('products.show', compact(
             'product', 
             'relatedProducts', 
             'avgRating', 
             'totalReviews',
             'ratingStats',
-            'reviews'
+            'reviews',
+            'userReview'
         ));
     }
 }

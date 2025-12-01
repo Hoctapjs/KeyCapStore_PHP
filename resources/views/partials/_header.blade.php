@@ -117,7 +117,7 @@
                                 $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
                             @endphp
                             @if($wishlistCount > 0)
-                            <span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                            <span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">
                                 {{ $wishlistCount }}
                             </span>
                             @endif

@@ -6,6 +6,7 @@
     <title>@yield('title', 'Admin Panel') - KeyCap Store</title>
     
     <link href="{{ asset('vendor/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
         * {

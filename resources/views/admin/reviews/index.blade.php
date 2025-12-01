@@ -89,33 +89,33 @@
                                     </td>
                                     <td>{{ $review->created_at->format('d/m/Y H:i') }}</td>
                                     <td>
-                                        <div class="btn-group btn-group-sm">
+                                        <div class="d-flex gap-1">
                                             @if($review->status != 'approved')
-                                            <form action="{{ route('admin.reviews.approve', $review) }}" method="POST" class="d-inline">
+                                            <form action="{{ route('admin.reviews.approve', $review) }}" method="POST" class="flex-fill">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="btn btn-success" title="Duyệt">
-                                                    ✓
+                                                <button type="submit" class="btn btn-success btn-sm w-100" title="Duyệt">
+                                                    <i class="bi bi-check-circle-fill"></i>
                                                 </button>
                                             </form>
                                             @endif
                                             
                                             @if($review->status != 'rejected')
-                                            <form action="{{ route('admin.reviews.reject', $review) }}" method="POST" class="d-inline">
+                                            <form action="{{ route('admin.reviews.reject', $review) }}" method="POST" class="flex-fill">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="btn btn-warning" title="Từ chối">
-                                                    ✗
+                                                <button type="submit" class="btn btn-warning btn-sm w-100" title="Từ chối">
+                                                    <i class="bi bi-x-circle-fill"></i>
                                                 </button>
                                             </form>
                                             @endif
                                             
                                             <form action="{{ route('admin.reviews.destroy', $review) }}" method="POST" 
-                                                  class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa?')">
+                                                  class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn xóa?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger" title="Xóa">
-                                                    🗑
+                                                <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa">
+                                                    <i class="bi bi-trash-fill"></i>
                                                 </button>
                                             </form>
                                         </div>

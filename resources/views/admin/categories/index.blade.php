@@ -18,7 +18,15 @@
                 <input type="text" name="search" class="form-control" placeholder="Tìm kiếm danh mục..." value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                <select name="sort" class="form-select">
+                    <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Mới nhất</option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Cũ nhất</option>
+                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Tên A-Z</option>
+                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Tên Z-A</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Lọc</button>
             </div>
             <div class="col-md-2">
                 <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary w-100">Reset</a>
@@ -31,7 +39,6 @@
                 <thead class="table-dark">
                     <tr>
                         <th width="80">ID</th>
-                        <th width="100">Icon</th>
                         <th>Tên danh mục</th>
                         <th>Slug</th>
                         <th>Số sản phẩm</th>
@@ -42,19 +49,7 @@
                     @forelse($categories as $category)
                     <tr>
                         <td>{{ $category->id }}</td>
-                        <td>
-                            @if($category->icon)
-                            <i class="{{ $category->icon }}" style="font-size: 2rem;"></i>
-                            @else
-                            <i class="bi bi-folder" style="font-size: 2rem; color: #ccc;"></i>
-                            @endif
-                        </td>
-                        <td>
-                            <strong>{{ $category->name }}</strong>
-                            @if($category->description)
-                            <br><small class="text-muted">{{ Str::limit($category->description, 50) }}</small>
-                            @endif
-                        </td>
+                        <td><strong>{{ $category->name }}</strong></td>
                         <td><code>{{ $category->slug }}</code></td>
                         <td>
                             <span class="badge bg-info">{{ $category->products_count ?? 0 }}</span>
@@ -62,8 +57,8 @@
                         <td>
                             <div class="d-flex gap-1">
                                 <a href="{{ route('admin.categories.edit', $category->id) }}" 
-                                   class="btn btn-warning btn-sm flex-fill" title="Sửa danh mục">
-                                    <i class="bi bi-pencil-fill"></i> Sửa
+                                   class="btn btn-warning btn-sm flex-fill" title="Sửa">
+                                    <i class="bi bi-pencil-fill"></i>
                                 </a>
                                 <form action="{{ route('admin.categories.destroy', $category->id) }}" 
                                       method="POST" 
@@ -71,8 +66,8 @@
                                       onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa danh mục">
-                                        <i class="bi bi-trash-fill"></i> Xóa
+                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa">
+                                        <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </form>
                             </div>
@@ -80,7 +75,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4">
+                        <td colspan="5" class="text-center py-4">
                             <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
                             <p class="text-muted mt-2">Không có danh mục nào</p>
                         </td>

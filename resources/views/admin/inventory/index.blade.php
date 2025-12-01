@@ -146,8 +146,8 @@
                                     data-sku="{{ $variant->sku }}"
                                     data-options="{{ json_encode($variant->option_values) }}"
                                     data-stock="{{ $variant->stock_quantity }}"
-                                    title="Cập nhật tồn kho">
-                                <i class="bi bi-arrow-repeat"></i> Cập nhật
+                                    title="Cập nhật">
+                                <i class="bi bi-arrow-repeat"></i>
                             </button>
                         </td>
                     </tr>

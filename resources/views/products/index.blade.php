@@ -302,7 +302,7 @@ $(document).ready(function() {
                     // Update wishlist count in header
                     if (response.count > 0) {
                         if ($('.wishlist-count').length === 0) {
-                            $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">' + response.count + '</span>');
+                            $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">' + response.count + '</span>');
                         } else {
                             $('.wishlist-count').text(response.count).show();
                         }
