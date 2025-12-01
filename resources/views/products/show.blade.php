@@ -141,6 +141,9 @@
     
     /* Wishlist button styles */
     .btn-wishlist {
+        position: absolute;
+        top: 10px;
+        right: 10px;
         z-index: 10;
         width: 40px;
         height: 40px;
@@ -655,8 +658,7 @@
                                        class="btn-wishlist wishlist-toggle" 
                                        data-product-id="{{ $related->id }}"
                                        data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
-                                       title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}"
-                                       onclick="event.stopPropagation();">
+                                       title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}">
                                         <svg width="24" height="24">
                                             <use xlink:href="#heart"></use>
                                         </svg>
@@ -692,21 +694,25 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        // Handle product card click for related products
-        $('.product-item').click(function() {
-            var url = $(this).data('url');
-            if (url) {
-                window.location.href = url;
-            }
-        });
+        console.log('jQuery loaded:', typeof jQuery !== 'undefined');
+        console.log('Wishlist buttons found:', $('.wishlist-toggle').length);
         
-        // Wishlist toggle functionality
+        // Wishlist toggle functionality - MUST be before product-item click
         $(document).on('click', '.wishlist-toggle', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             
             const $btn = $(this);
             const productId = $btn.data('product-id');
             const isInWishlist = $btn.data('in-wishlist') === 'true' || $btn.data('in-wishlist') === true;
+            
+            console.log('jQuery Wishlist toggle clicked:', productId, 'Current state:', isInWishlist);
+            
+            @guest
+                alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
+                window.location.href = '{{ route("login.form") }}';
+                return;
+            @endguest
             
             $.ajax({
                 url: `/wishlist/toggle/${productId}`,
@@ -715,6 +721,7 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
+                    console.log('Wishlist response:', response);
                     if (response.success) {
                         // Update button state
                         $btn.data('in-wishlist', response.in_wishlist);
@@ -736,6 +743,7 @@
                     }
                 },
                 error: function(xhr) {
+                    console.error('Wishlist error:', xhr);
                     if (xhr.status === 401) {
                         alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
                         window.location.href = '{{ route("login.form") }}';
@@ -744,6 +752,18 @@
                     }
                 }
             });
+        });
+        
+        // Handle product card click for related products (exclude wishlist button)
+        $('.product-item').on('click', function(e) {
+            // Don't navigate if clicking on wishlist button
+            if ($(e.target).closest('.wishlist-toggle').length) {
+                return;
+            }
+            var url = $(this).data('url');
+            if (url) {
+                window.location.href = url;
+            }
         });
         
         // Load variants data
