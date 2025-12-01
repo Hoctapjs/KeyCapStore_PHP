@@ -58,8 +58,8 @@
                     <label class="form-label">Trạng thái</label>
                     <select name="status" class="form-select @error('status') is-invalid @enderror">
                         <option value="active" {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>Hoạt động</option>
-                        <option value="inactive" {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
                         <option value="draft" {{ old('status', $product->status) == 'draft' ? 'selected' : '' }}>Bản nháp</option>
+                        <option value="archived" {{ old('status', $product->status) == 'archived' ? 'selected' : '' }}>Lưu trữ</option>
                     </select>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>

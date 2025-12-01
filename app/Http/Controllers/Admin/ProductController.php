@@ -142,7 +142,7 @@ class ProductController extends Controller
             'code' => 'nullable|string|max:255',
             'brand_id' => 'nullable|exists:brands,id',
             'description' => 'nullable|string',
-            'status' => 'required|in:draft,active,inactive',
+            'status' => 'required|in:draft,active,archived',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
