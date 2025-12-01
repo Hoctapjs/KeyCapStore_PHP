@@ -60,19 +60,19 @@
                             <span class="badge bg-info">{{ $category->products_count ?? 0 }}</span>
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
+                            <div class="d-flex gap-1">
                                 <a href="{{ route('admin.categories.edit', $category->id) }}" 
-                                   class="btn btn-warning">
-                                    <i class="bi bi-pencil"></i> Sửa
+                                   class="btn btn-warning btn-sm flex-fill" title="Sửa danh mục">
+                                    <i class="bi bi-pencil-fill"></i> Sửa
                                 </a>
                                 <form action="{{ route('admin.categories.destroy', $category->id) }}" 
                                       method="POST" 
-                                      class="d-inline"
+                                      class="flex-fill"
                                       onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-trash"></i> Xóa
+                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa danh mục">
+                                        <i class="bi bi-trash-fill"></i> Xóa
                                     </button>
                                 </form>
                             </div>

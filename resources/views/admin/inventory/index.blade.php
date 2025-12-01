@@ -138,15 +138,16 @@
                             @endif
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-primary" 
+                            <button class="btn btn-sm btn-primary w-100" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#adjustModal"
                                     data-id="{{ $variant->id }}"
                                     data-name="{{ $variant->product->title }}"
                                     data-sku="{{ $variant->sku }}"
                                     data-options="{{ json_encode($variant->option_values) }}"
-                                    data-stock="{{ $variant->stock_quantity }}">
-                                <i class="bi bi-pencil-square"></i>
+                                    data-stock="{{ $variant->stock_quantity }}"
+                                    title="Cập nhật tồn kho">
+                                <i class="bi bi-arrow-repeat"></i> Cập nhật
                             </button>
                         </td>
                     </tr>

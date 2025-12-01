@@ -107,27 +107,25 @@
                             </span>
                         </td>
                         <td>
-                            <div class="btn-group-vertical btn-group-sm w-100" role="group">
-                                <a href="{{ route('admin.products.variants.index', $product->id) }}" 
-                                   class="btn btn-info btn-sm mb-1">
-                                    <i class="bi bi-grid-3x3"></i> Biến thể ({{ $product->variants->count() }})
+                            <a href="{{ route('admin.products.variants.index', $product->id) }}" 
+                               class="btn btn-info btn-sm mb-2 w-100" title="Quản lý biến thể">
+                                <i class="bi bi-grid-3x3"></i> Biến thể ({{ $product->variants->count() }})
+                            </a>
+                            <div class="d-flex gap-1">
+                                <a href="{{ route('admin.products.edit', $product->id) }}" 
+                                   class="btn btn-warning btn-sm flex-fill" title="Sửa sản phẩm">
+                                    <i class="bi bi-pencil-fill"></i>
                                 </a>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('admin.products.edit', $product->id) }}" 
-                                       class="btn btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.products.destroy', $product->id) }}" 
-                                          method="POST" 
-                                          class="d-inline"
-                                          onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                <form action="{{ route('admin.products.destroy', $product->id) }}" 
+                                      method="POST" 
+                                      class="flex-fill"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm w-100" title="Xóa sản phẩm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
