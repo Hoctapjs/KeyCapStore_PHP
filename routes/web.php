@@ -111,6 +111,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
 
     // Products
     Route::resource('products', AdminProductController::class);
+    Route::delete('products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.images.delete');
     
     // Product Variants (nested resource)
     Route::prefix('products/{product}/variants')->name('products.variants.')->group(function () {

@@ -66,6 +66,8 @@ class ProductController extends Controller
             'categories.*' => 'exists:categories,id',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:product_tags,id',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::beginTransaction();
@@ -80,6 +82,20 @@ class ProductController extends Controller
             $product->description = $validated['description'] ?? null;
             $product->status = $validated['status'];
             $product->save();
+
+            // Upload images
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $image) {
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('images/products'), $filename);
+                    
+                    $product->productImages()->create([
+                        'image_url' => '/images/products/' . $filename,
+                        'alt' => $product->title,
+                        'sort_order' => $index
+                    ]);
+                }
+            }
 
             if (!empty($validated['categories'])) {
                 $categoryData = [];
@@ -114,7 +130,7 @@ class ProductController extends Controller
         $brands = Brand::all();
         $categories = Category::whereNull('parent_id')->with('children')->get();
         $tags = ProductTag::all();
-        $product->load(['categories', 'tags']);
+        $product->load(['categories', 'tags', 'productImages']);
 
         return view('admin.products.edit', compact('product', 'brands', 'categories', 'tags'));
     }
@@ -125,14 +141,10 @@ class ProductController extends Controller
             'title' => 'required|string|max:255',
             'code' => 'nullable|string|max:255',
             'brand_id' => 'nullable|exists:brands,id',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'status' => 'required|in:draft,active,archived',
-            'categories' => 'nullable|array',
-            'categories.*' => 'exists:categories,id',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:product_tags,id',
+            'status' => 'required|in:draft,active,inactive',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::beginTransaction();
@@ -141,26 +153,23 @@ class ProductController extends Controller
             $product->code = $validated['code'] ?? null;
             $product->slug = Str::slug($validated['title']);
             $product->brand_id = $validated['brand_id'] ?? null;
-            $product->price = $validated['price'];
-            $product->stock = $validated['stock'];
             $product->description = $validated['description'] ?? null;
             $product->status = $validated['status'];
             $product->save();
 
-            if (!empty($validated['categories'])) {
-                $categoryData = [];
-                foreach ($validated['categories'] as $index => $categoryId) {
-                    $categoryData[$categoryId] = ['primary_flag' => $index === 0];
+            // Upload new images
+            if ($request->hasFile('images')) {
+                $maxSortOrder = $product->productImages()->max('sort_order') ?? -1;
+                foreach ($request->file('images') as $index => $image) {
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('images/products'), $filename);
+                    
+                    $product->productImages()->create([
+                        'image_url' => '/images/products/' . $filename,
+                        'alt' => $product->title,
+                        'sort_order' => $maxSortOrder + $index + 1
+                    ]);
                 }
-                $product->categories()->sync($categoryData);
-            } else {
-                $product->categories()->detach();
-            }
-
-            if (!empty($validated['tags'])) {
-                $product->tags()->sync($validated['tags']);
-            } else {
-                $product->tags()->detach();
             }
 
             DB::commit();
@@ -170,6 +179,27 @@ class ProductController extends Controller
             DB::rollBack();
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+
+    public function deleteImage($imageId)
+    {
+        try {
+            $image = \App\Models\ProductImage::findOrFail($imageId);
+            $productId = $image->product_id;
+            
+            // Delete physical file
+            $imagePath = public_path($image->image_url);
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+            
+            $image->delete();
+            
+            return redirect()->route('admin.products.edit', $productId)
+                ->with('success', 'Hình ảnh đã được xóa!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Không thể xóa hình ảnh: ' . $e->getMessage());
         }
     }
 

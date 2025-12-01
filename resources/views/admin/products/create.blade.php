@@ -143,6 +143,19 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+
+                <!-- Product Images -->
+                <div class="col-md-12">
+                    <label class="form-label">Hình ảnh sản phẩm</label>
+                    <input type="file" name="images[]" multiple accept="image/*" class="form-control @error('images') is-invalid @enderror" id="productImages">
+                    <small class="text-muted">Bạn có thể chọn nhiều hình ảnh cùng lúc</small>
+                    @error('images')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    
+                    <!-- Image Preview -->
+                    <div id="imagePreview" class="row g-2 mt-2"></div>
+                </div>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
@@ -157,3 +170,32 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.getElementById('productImages').addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    const files = e.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const col = document.createElement('div');
+            col.className = 'col-md-2';
+            col.innerHTML = `
+                <div class="border rounded p-2">
+                    <img src="${e.target.result}" class="img-fluid rounded">
+                    <small class="d-block text-truncate mt-1">${file.name}</small>
+                </div>
+            `;
+            preview.appendChild(col);
+        }
+        
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+@endpush
