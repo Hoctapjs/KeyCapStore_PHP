@@ -130,13 +130,6 @@ class ProductController extends Controller
                 'productImages' => function($query) {
                     $query->select('id', 'product_id', 'image_url', 'alt', 'sort_order')
                         ->orderBy('sort_order');
-                },
-                'reviews' => function($query) {
-                    $query->select('id', 'product_id', 'user_id', 'rating', 'title', 'content', 'created_at')
-                        ->with('user:id,name')
-                        ->where('status', 'approved')
-                        ->latest()
-                        ->limit(10);
                 }
             ])
             ->active()
@@ -160,10 +153,36 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
-        // Calculate average rating from loaded reviews
-        $avgRating = $product->reviews->avg('rating');
-        $reviewsCount = $product->reviews->count();
+        // Calculate reviews statistics
+        $allReviews = $product->reviews()->where('status', 'approved')->get();
+        $avgRating = $allReviews->avg('rating') ?? 0;
+        $totalReviews = $allReviews->count();
+        
+        // Rating statistics (count for each star)
+        $ratingStats = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $ratingStats[$i] = $allReviews->where('rating', $i)->count();
+        }
 
-        return view('products.show', compact('product', 'relatedProducts', 'avgRating', 'reviewsCount'));
+        // Get reviews with pagination and optional filter by rating
+        $reviewsQuery = $product->reviews()
+            ->with('user:id,name')
+            ->where('status', 'approved');
+        
+        // Filter by rating if provided
+        if (request('rating') && request('rating') != 'all') {
+            $reviewsQuery->where('rating', request('rating'));
+        }
+        
+        $reviews = $reviewsQuery->latest()->paginate(10);
+
+        return view('products.show', compact(
+            'product', 
+            'relatedProducts', 
+            'avgRating', 
+            'totalReviews',
+            'ratingStats',
+            'reviews'
+        ));
     }
 }

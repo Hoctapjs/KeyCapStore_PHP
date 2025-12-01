@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ProductVariantController as AdminProductVariantCo
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/', [ProductController::class, 'index'])->name('home');
 
@@ -170,4 +171,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+});
+
+// Review routes
+Route::middleware('auth')->group(function () {
+    Route::get('/products/{product}/review', [ReviewController::class, 'create'])->name('review.create');
+    Route::post('/products/{product}/review', [ReviewController::class, 'store'])->name('review.store');
+    Route::get('/reviews/{review}/edit', [ReviewController::class, 'edit'])->name('review.edit');
+    Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('review.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('review.destroy');
 });
