@@ -154,6 +154,14 @@
                 📈 Quản lý tồn kho
             </a>
             
+            <a href="{{ route('admin.reviews.index') }}" class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+                ⭐ Quản lý đánh giá
+            </a>
+            
+            <a href="{{ route('admin.coupons.index') }}" class="nav-item {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
+                🎫 Quản lý coupon
+            </a>
+            
             <hr style="border-color: #34495e; margin: 20px 0;">
             
             <a href="{{ route('home') }}" class="nav-item" target="_blank">
