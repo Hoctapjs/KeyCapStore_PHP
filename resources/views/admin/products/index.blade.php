@@ -102,13 +102,9 @@
                             @endif
                         </td>
                         <td>
-                            @if($product->status == 'active')
-                            <span class="badge bg-success">Hoạt động</span>
-                            @elseif($product->status == 'inactive')
-                            <span class="badge bg-secondary">Tạm ngưng</span>
-                            @else
-                            <span class="badge bg-danger">Hết hàng</span>
-                            @endif
+                            <span class="badge {{ $product->status_badge_class }}">
+                                {{ $product->status_label }}
+                            </span>
                         </td>
                         <td>
                             <div class="btn-group-vertical btn-group-sm w-100" role="group">

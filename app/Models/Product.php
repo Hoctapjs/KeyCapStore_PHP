@@ -91,6 +91,16 @@ class Product extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopeDraft($query)
+    {
+        return $query->where('status', 'draft');
+    }
+
+    public function scopeArchived($query)
+    {
+        return $query->where('status', 'archived');
+    }
+
     public function scopeInStock($query)
     {
         return $query->where('stock', '>', 0);
@@ -164,5 +174,31 @@ class Product extends Model
         }
         
         return number_format($min, 0, ',', '.') . 'đ - ' . number_format($max, 0, ',', '.') . 'đ';
+    }
+
+    /**
+     * Lấy tên trạng thái bằng tiếng Việt
+     */
+    public function getStatusLabelAttribute()
+    {
+        return match($this->status) {
+            'active' => 'Hoạt động',
+            'draft' => 'Bản nháp',
+            'archived' => 'Lưu trữ',
+            default => $this->status,
+        };
+    }
+
+    /**
+     * Lấy màu badge cho trạng thái
+     */
+    public function getStatusBadgeClassAttribute()
+    {
+        return match($this->status) {
+            'active' => 'bg-success',
+            'draft' => 'bg-warning text-dark',
+            'archived' => 'bg-secondary',
+            default => 'bg-danger',
+        };
     }
 }
