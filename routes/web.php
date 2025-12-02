@@ -21,6 +21,10 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
 
+// ChatController
+use App\Http\Controllers\ChatController;
+
+
 Route::get('/', [ProductController::class, 'index'])->name('home');
 
 Route::get('/temp', [HomeController::class, 'temp'])->name('temp');
@@ -112,7 +116,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
     // Products
     Route::resource('products', AdminProductController::class);
     Route::delete('products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.images.delete');
-    
+
     // Product Variants (nested resource)
     Route::prefix('products/{product}/variants')->name('products.variants.')->group(function () {
         Route::get('/', [AdminProductVariantController::class, 'index'])->name('index');
@@ -193,3 +197,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('review.update');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('review.destroy');
 });
+
+// Chat
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+Route::post('/chat/send', [ChatController::class, 'sendMessage']);

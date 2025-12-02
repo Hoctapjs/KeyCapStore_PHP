@@ -29,6 +29,7 @@
         @yield('content')
     </div>
 
+    @include('partials.chat_widget')
 
     @include('partials._footer')
     @include('partials._footer-bottom')

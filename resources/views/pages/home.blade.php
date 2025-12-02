@@ -8,6 +8,47 @@
     .temp-header {
         color: #007bff;
     }
+
+    .product-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #f0f0f0;
+        /* Thêm viền nhẹ nếu cần */
+        transition: all 0.3s ease;
+    }
+
+    .product-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-item figure {
+        margin-bottom: 1rem;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .product-item h3 {
+        min-height: 3em;
+        /* Giữ chiều cao đều nhau cho tên sản phẩm */
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .product-item .price {
+        margin-top: auto;
+        margin-bottom: 1rem;
+        font-weight: bold;
+        color: #007bff;
+        font-size: 1.2rem;
+    }
+
+    /* CSS cho ảnh để đảm bảo không bị méo */
+    .tab-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+    }
 </style>
 @endpush
 

@@ -7,6 +7,7 @@
 <meta name="author" content="">
 <meta name="keywords" content="">
 <meta name="description" content="">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <link rel="stylesheet" href="{{ asset('vendor/swiper-bundle.min.css') }}">
 <link href="{{ asset('vendor/bootstrap.min.css') }}" rel="stylesheet">
