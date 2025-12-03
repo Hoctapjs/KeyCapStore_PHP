@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,7 +13,7 @@ class ProductVariantController extends Controller
 {
     public function index(Product $product)
     {
-        $variants = $product->variants()->paginate(20);
+        $variants = $product->variants()->with('images')->paginate(20);
         return view('admin.products.variants.index', compact('product', 'variants'));
     }
 
@@ -29,6 +30,8 @@ class ProductVariantController extends Controller
             'option_values' => 'nullable|array',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::beginTransaction();
@@ -55,6 +58,25 @@ class ProductVariantController extends Controller
             $variant->stock_quantity = $validated['stock_quantity'];
             $variant->save();
 
+            // Upload variant images
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $image) {
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('images/products'), $filename);
+                    
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'variant_id' => $variant->id,
+                        'image_url' => '/images/products/' . $filename,
+                        'alt' => $product->title . ' - ' . $variant->sku,
+                        'sort_order' => $index
+                    ]);
+                }
+            }
+
+            // Update product total stock
+            $this->updateProductStock($product);
+
             DB::commit();
             return redirect()->route('admin.products.variants.index', $product)
                 ->with('success', 'Biến thể đã được tạo thành công!');
@@ -72,6 +94,8 @@ class ProductVariantController extends Controller
             abort(404);
         }
 
+        $variant->load('images');
+
         return view('admin.products.variants.edit', compact('product', 'variant'));
     }
 
@@ -88,6 +112,8 @@ class ProductVariantController extends Controller
             'option_values' => 'nullable|array',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::beginTransaction();
@@ -112,6 +138,26 @@ class ProductVariantController extends Controller
             $variant->stock_quantity = $validated['stock_quantity'];
             $variant->save();
 
+            // Upload new variant images
+            if ($request->hasFile('images')) {
+                $maxSortOrder = $variant->images()->max('sort_order') ?? -1;
+                foreach ($request->file('images') as $index => $image) {
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('images/products'), $filename);
+                    
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'variant_id' => $variant->id,
+                        'image_url' => '/images/products/' . $filename,
+                        'alt' => $product->title . ' - ' . $variant->sku,
+                        'sort_order' => $maxSortOrder + $index + 1
+                    ]);
+                }
+            }
+
+            // Update product total stock
+            $this->updateProductStock($product);
+
             DB::commit();
             return redirect()->route('admin.products.variants.index', $product)
                 ->with('success', 'Biến thể đã được cập nhật!');
@@ -130,11 +176,34 @@ class ProductVariantController extends Controller
         }
 
         try {
+            // Delete variant images
+            foreach ($variant->images as $image) {
+                $imagePath = public_path($image->image_url);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                $image->delete();
+            }
+            
             $variant->delete();
+
+            // Update product total stock
+            $this->updateProductStock($product);
+
             return redirect()->route('admin.products.variants.index', $product)
                 ->with('success', 'Biến thể đã được xóa!');
         } catch (\Exception $e) {
             return back()->with('error', 'Không thể xóa biến thể: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Update product stock based on sum of all variants stock
+     */
+    private function updateProductStock(Product $product)
+    {
+        $totalStock = $product->variants()->sum('stock_quantity');
+        $product->stock = $totalStock;
+        $product->save();
     }
 }

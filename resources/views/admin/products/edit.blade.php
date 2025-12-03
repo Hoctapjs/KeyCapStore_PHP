@@ -66,6 +66,62 @@
                     @enderror
                 </div>
 
+                <!-- Categories -->
+                @php
+                    $selectedCategories = old('categories', $product->categories->pluck('id')->toArray());
+                @endphp
+                <div class="col-md-6">
+                    <label class="form-label">Danh mục</label>
+                    <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                        @foreach($categories as $category)
+                            <div class="mb-2">
+                                <div class="form-check">
+                                    <input type="checkbox" name="categories[]" value="{{ $category->id }}" 
+                                           {{ in_array($category->id, $selectedCategories) ? 'checked' : '' }}
+                                           class="form-check-input" id="cat{{ $category->id }}">
+                                    <label class="form-check-label fw-bold" for="cat{{ $category->id }}">
+                                        {{ $category->name }}
+                                    </label>
+                                </div>
+                                @if($category->children->count() > 0)
+                                    <div class="ms-4 mt-1">
+                                        @foreach($category->children as $child)
+                                            <div class="form-check">
+                                                <input type="checkbox" name="categories[]" value="{{ $child->id }}"
+                                                       {{ in_array($child->id, $selectedCategories) ? 'checked' : '' }}
+                                                       class="form-check-input" id="cat{{ $child->id }}">
+                                                <label class="form-check-label" for="cat{{ $child->id }}">
+                                                    {{ $child->name }}
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                @php
+                    $selectedTags = old('tags', $product->tags->pluck('id')->toArray());
+                @endphp
+                <div class="col-md-6">
+                    <label class="form-label">Tags</label>
+                    <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                        @foreach($tags as $tag)
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
+                                       {{ in_array($tag->id, $selectedTags) ? 'checked' : '' }}
+                                       class="form-check-input" id="tag{{ $tag->id }}">
+                                <label class="form-check-label" for="tag{{ $tag->id }}">
+                                    {{ $tag->name }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <!-- Description -->
                 <div class="col-md-12">
                     <label class="form-label">Mô tả</label>

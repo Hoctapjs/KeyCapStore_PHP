@@ -14,7 +14,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.products.variants.update', [$product, $variant]) }}" method="POST">
+                <form action="{{ route('admin.products.variants.update', [$product, $variant]) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -53,6 +53,42 @@
                             @error('stock_quantity')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- Variant Images Upload -->
+                        <div class="col-md-6">
+                            <label class="form-label">Thêm hình ảnh mới</label>
+                            <input type="file" name="images[]" multiple accept="image/*" 
+                                   class="form-control @error('images') is-invalid @enderror" id="variantImages">
+                            <small class="text-muted">Chọn hình ảnh mới cho biến thể</small>
+                            @error('images')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Current Variant Images -->
+                        @if($variant->images->count() > 0)
+                        <div class="col-md-12">
+                            <label class="form-label">Hình ảnh hiện tại của biến thể</label>
+                            <div class="row g-2">
+                                @foreach($variant->images as $image)
+                                <div class="col-md-2">
+                                    <div class="border rounded p-2 position-relative">
+                                        <img src="{{ $image->image_url }}" class="img-fluid rounded">
+                                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
+                                                onclick="deleteVariantImage({{ $image->id }})">
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Image Preview -->
+                        <div class="col-md-12">
+                            <div id="imagePreview" class="row g-2"></div>
                         </div>
 
                         <!-- Dynamic Options -->
@@ -132,6 +168,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('options-container');
     const addButton = document.getElementById('add-option');
     
+    // Image preview
+    document.getElementById('variantImages').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        const files = e.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.className = 'col-md-2';
+                col.innerHTML = `
+                    <div class="border rounded p-2">
+                        <img src="${e.target.result}" class="img-fluid rounded">
+                        <small class="d-block text-truncate mt-1">${file.name}</small>
+                    </div>
+                `;
+                preview.appendChild(col);
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    });
+    
     addButton.addEventListener('click', function() {
         const newRow = document.createElement('div');
         newRow.className = 'option-row row g-2 mb-2';
@@ -192,4 +254,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<form id="deleteVariantImageForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+function deleteVariantImage(imageId) {
+    if (confirm('Bạn có chắc muốn xóa hình ảnh này?')) {
+        const form = document.getElementById('deleteVariantImageForm');
+        form.action = `/admin/products/images/${imageId}`;
+        form.submit();
+    }
+}
+</script>
 @endsection

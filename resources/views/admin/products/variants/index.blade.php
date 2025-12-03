@@ -57,6 +57,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th width="80">ID</th>
+                        <th width="80">Ảnh</th>
                         <th>SKU</th>
                         <th>Thuộc tính</th>
                         <th>Giá</th>
@@ -69,6 +70,22 @@
                     @forelse($variants as $variant)
                     <tr>
                         <td>{{ $variant->id }}</td>
+                        <td>
+                            @if($variant->images->count() > 0)
+                                <img src="{{ $variant->images->first()->image_url }}" 
+                                     alt="{{ $variant->sku }}" 
+                                     class="rounded"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                @if($variant->images->count() > 1)
+                                    <span class="badge bg-info">+{{ $variant->images->count() - 1 }}</span>
+                                @endif
+                            @else
+                                <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded" 
+                                     style="width: 50px; height: 50px; font-size: 10px;">
+                                    No img
+                                </div>
+                            @endif
+                        </td>
                         <td><code>{{ $variant->sku }}</code></td>
                         <td>
                             @if($variant->option_values)
@@ -107,7 +124,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4">
+                        <td colspan="8" class="text-center py-4">
                             <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
                             <p class="text-muted mt-2">Chưa có biến thể nào</p>
                             <a href="{{ route('admin.products.variants.create', $product) }}" class="btn btn-primary">

@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\ProductVariantController as AdminProductVariantController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
+use App\Http\Controllers\Admin\TagController as AdminTagController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
@@ -154,6 +156,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
 
     // Coupons Management
     Route::resource('coupons', AdminCouponController::class);
+
+    // Tags Management
+    Route::resource('tags', AdminTagController::class);
+
+    // Orders Management
+    Route::resource('orders', AdminOrderController::class);
+    Route::patch('orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
 });
 
 // Route cho Cart (chức năng liên quan đến giỏ hàng)
