@@ -252,14 +252,33 @@
         let searchTimeout;
         $(document).ready(function() {
             const $searchInput = $('#search-input');
+            const $searchForm = $('#search-form');
             const $suggestions = $('#search-suggestions');
             const $categorySelect = $('#search-category');
-            const $categoryInput = $('#search-category-input');
             
-            // Sync category select with hidden input
+            // Handle form submit - add category if selected
+            $searchForm.on('submit', function(e) {
+                e.preventDefault(); // Prevent default first
+                const category = $categorySelect.val();
+                console.log('Form submit, category:', category);
+                // Remove any existing category input
+                $searchForm.find('input[name="category"]').remove();
+                // Only add category if it has a value
+                if (category) {
+                    $searchForm.append('<input type="hidden" name="category" value="' + category + '">');
+                }
+                // Now submit the form
+                this.submit();
+            });
+            
+            // Also handle icon click
+            $('.search-submit-btn').on('click', function(e) {
+                e.preventDefault();
+                $searchForm.trigger('submit');
+            });
+            
+            // Re-fetch suggestions when category changes
             $categorySelect.on('change', function() {
-                $categoryInput.val($(this).val());
-                // Re-fetch suggestions when category changes
                 const query = $searchInput.val().trim();
                 if (query.length >= 2) {
                     fetchSuggestions(query);
@@ -291,8 +310,10 @@
             
             // Show suggestions on focus if there's text
             $searchInput.on('focus', function() {
-                if ($(this).val().trim().length >= 2) {
-                    $suggestions.show();
+                const query = $(this).val().trim();
+                if (query.length >= 2) {
+                    // Re-fetch suggestions when focusing on input with existing text
+                    fetchSuggestions(query);
                 }
             });
             

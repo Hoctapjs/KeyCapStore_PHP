@@ -29,7 +29,7 @@ class ProductController extends Controller
             ->where('status', 'active');
 
         // Filter by category
-        if ($request->has('category')) {
+        if ($request->filled('category')) {
             $query->whereHas('categories', function($q) use ($request) {
                 $q->where('slug', $request->category);
             });
