@@ -14,7 +14,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.products.variants.store', $product) }}" method="POST">
+                <form action="{{ route('admin.products.variants.store', $product) }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="mb-4">
@@ -55,6 +55,22 @@
                             @error('stock_quantity')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- Variant Images -->
+                        <div class="col-md-6">
+                            <label class="form-label">Hình ảnh biến thể</label>
+                            <input type="file" name="images[]" multiple accept="image/*" 
+                                   class="form-control @error('images') is-invalid @enderror" id="variantImages">
+                            <small class="text-muted">Chọn hình ảnh riêng cho biến thể này</small>
+                            @error('images')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="col-md-12">
+                            <div id="imagePreview" class="row g-2"></div>
                         </div>
 
                         <!-- Dynamic Options -->
@@ -127,6 +143,32 @@
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('options-container');
     const addButton = document.getElementById('add-option');
+    
+    // Image preview
+    document.getElementById('variantImages').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        const files = e.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.className = 'col-md-2';
+                col.innerHTML = `
+                    <div class="border rounded p-2">
+                        <img src="${e.target.result}" class="img-fluid rounded">
+                        <small class="d-block text-truncate mt-1">${file.name}</small>
+                    </div>
+                `;
+                preview.appendChild(col);
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    });
     
     // Add option row
     addButton.addEventListener('click', function() {
