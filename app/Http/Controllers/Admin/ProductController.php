@@ -143,6 +143,10 @@ class ProductController extends Controller
             'brand_id' => 'nullable|exists:brands,id',
             'description' => 'nullable|string',
             'status' => 'required|in:draft,active,archived',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:product_tags,id',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
@@ -170,6 +174,24 @@ class ProductController extends Controller
                         'sort_order' => $maxSortOrder + $index + 1
                     ]);
                 }
+            }
+
+            // Sync categories
+            if (isset($validated['categories'])) {
+                $categoryData = [];
+                foreach ($validated['categories'] as $index => $categoryId) {
+                    $categoryData[$categoryId] = ['primary_flag' => $index === 0];
+                }
+                $product->categories()->sync($categoryData);
+            } else {
+                $product->categories()->detach();
+            }
+
+            // Sync tags
+            if (isset($validated['tags'])) {
+                $product->tags()->sync($validated['tags']);
+            } else {
+                $product->tags()->detach();
             }
 
             DB::commit();

@@ -43,6 +43,11 @@ class ProductVariant extends Model
         return $this->hasMany(InventoryMovement::class, 'variant_id');
     }
 
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, 'variant_id');
+    }
+
     // Scopes
     public function scopeInStock($query)
     {

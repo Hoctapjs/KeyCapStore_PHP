@@ -304,6 +304,9 @@
                         $options = is_array($variant->option_values) ? $variant->option_values : [];
                         $size = $options['size'] ?? null;
                         $color = $options['color'] ?? null;
+                        
+                        // Get first variant image
+                        $variantImage = $variant->images->first();
 
                         if($size && !in_array($size, $sizes)) {
                             $sizes[] = $size;
@@ -317,7 +320,8 @@
                                 'color' => $color,
                                 'variant_id' => $variant->id,
                                 'price' => $variant->price,
-                                'stock' => $variant->stock_quantity
+                                'stock' => $variant->stock_quantity,
+                                'image' => $variantImage ? $variantImage->image_url : null
                             ];
                         } elseif (!$size && $color) {
                             // Chỉ có màu, không có size
@@ -325,7 +329,8 @@
                                 'color' => $color,
                                 'variant_id' => $variant->id,
                                 'price' => $variant->price,
-                                'stock' => $variant->stock_quantity
+                                'stock' => $variant->stock_quantity,
+                                'image' => $variantImage ? $variantImage->image_url : null
                             ];
                         }
                     }
@@ -351,13 +356,20 @@
                             <div id="color-options" class="d-flex gap-2 flex-wrap">
                                 @if(count($colorsOnly) > 0)
                                     @foreach($colorsOnly as $colorData)
-                                    <button type="button" class="btn btn-outline-secondary color-option {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
+                                    <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
                                             data-variant-id="{{ $colorData['variant_id'] }}"
                                             data-price="{{ $colorData['price'] }}"
                                             data-stock="{{ $colorData['stock'] }}"
+                                            data-image="{{ $colorData['image'] ?? '' }}"
                                             {{ $colorData['stock'] <= 0 ? 'disabled' : '' }}>
-                                        {{ $colorData['color'] }}
-                                        <small class="d-block">{{ number_format($colorData['price'], 0, ',', '.') }}đ</small>
+                                        @if($colorData['image'])
+                                        <img src="{{ $colorData['image'] }}" alt="{{ $colorData['color'] }}" 
+                                             style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                        @endif
+                                        <div class="text-start">
+                                            <span>{{ $colorData['color'] }}</span>
+                                            <small class="d-block">{{ number_format($colorData['price'], 0, ',', '.') }}đ</small>
+                                        </div>
                                     </button>
                                     @endforeach
                                 @endif
@@ -369,13 +381,20 @@
                             <h5 class="mb-3">Chọn màu sắc:</h5>
                             <div id="color-options" class="d-flex gap-2 flex-wrap">
                                 @foreach($colorsOnly as $colorData)
-                                <button type="button" class="btn btn-outline-secondary color-option {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
+                                <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
                                         data-variant-id="{{ $colorData['variant_id'] }}"
                                         data-price="{{ $colorData['price'] }}"
                                         data-stock="{{ $colorData['stock'] }}"
+                                        data-image="{{ $colorData['image'] ?? '' }}"
                                         {{ $colorData['stock'] <= 0 ? 'disabled' : '' }}>
-                                    {{ $colorData['color'] }}
-                                    <small class="d-block">{{ number_format($colorData['price'], 0, ',', '.') }}đ</small>
+                                    @if($colorData['image'])
+                                    <img src="{{ $colorData['image'] }}" alt="{{ $colorData['color'] }}" 
+                                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                    @endif
+                                    <div class="text-start">
+                                        <span>{{ $colorData['color'] }}</span>
+                                        <small class="d-block">{{ number_format($colorData['price'], 0, ',', '.') }}đ</small>
+                                    </div>
                                 </button>
                                 @endforeach
                             </div>
@@ -775,6 +794,7 @@
         function bindColorClick() {
             $('.color-option').click(function() {
                 const stock = $(this).data('stock');
+                const variantImage = $(this).data('image');
 
                 if (stock > 0) {
                     // Update UI chọn màu
@@ -788,6 +808,11 @@
                     const price = $(this).data('price');
                     const formattedPrice = new Intl.NumberFormat('vi-VN').format(price);
                     $('.product-price').html(formattedPrice + 'đ');
+
+                    // Đổi ảnh chính nếu biến thể có ảnh
+                    if (variantImage) {
+                        $('#mainProductImage').attr('src', variantImage);
+                    }
 
                     // Cập nhật max quantity
                     $('.input-number').attr('max', stock);
@@ -837,14 +862,21 @@
 
             colors.forEach(function(colorData) {
                 const disabled = colorData.stock <= 0 ? 'disabled opacity-50' : '';
+                const imageHtml = colorData.image 
+                    ? `<img src="${colorData.image}" alt="${colorData.color}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">`
+                    : '';
                 colorHtml += `
-                    <button type="button" class="btn btn-outline-secondary color-option ${disabled}" 
+                    <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 ${disabled}" 
                             data-variant-id="${colorData.variant_id}"
                             data-price="${colorData.price}"
                             data-stock="${colorData.stock}"
+                            data-image="${colorData.image || ''}"
                             ${colorData.stock <= 0 ? 'disabled' : ''}>
-                        ${colorData.color}
-                        <small class="d-block">${new Intl.NumberFormat('vi-VN').format(colorData.price)}đ</small>
+                        ${imageHtml}
+                        <div class="text-start">
+                            <span>${colorData.color}</span>
+                            <small class="d-block">${new Intl.NumberFormat('vi-VN').format(colorData.price)}đ</small>
+                        </div>
                     </button>
                 `;
             });

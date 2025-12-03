@@ -163,6 +163,14 @@
                 🎫 Quản lý coupon
             </a>
             
+            <a href="{{ route('admin.tags.index') }}" class="nav-item {{ request()->routeIs('admin.tags.*') ? 'active' : '' }}">
+                🏷️ Quản lý tag
+            </a>
+            
+            <a href="{{ route('admin.orders.index') }}" class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                📋 Quản lý đơn hàng
+            </a>
+            
             <hr style="border-color: #34495e; margin: 20px 0;">
             
             <a href="{{ route('home') }}" class="nav-item" target="_blank">

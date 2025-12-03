@@ -99,49 +99,116 @@
                             <!-- Categories -->
                             <div class="mb-4">
                                 <h6 class="mb-3">Danh mục</h6>
-                                @foreach($categories as $category)
-                                <div class="mb-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="category"
-                                            value="{{ $category->slug }}" id="cat-{{ $category->id }}"
-                                            {{ request('category') == $category->slug ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="cat-{{ $category->id }}">
-                                            {{ $category->name }}
-                                        </label>
+                                @if($categories->count() > 5)
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control form-control-sm" 
+                                               id="categorySearch" placeholder="Tìm danh mục...">
                                     </div>
-                                    @if($category->children->count() > 0)
-                                    <div class="ms-4 mt-1">
-                                        @foreach($category->children as $child)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="category"
-                                                value="{{ $child->slug }}" id="cat-{{ $child->id }}"
-                                                {{ request('category') == $child->slug ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="cat-{{ $child->id }}">
-                                                {{ $child->name }}
-                                            </label>
+                                @endif
+                                <div id="categoryList">
+                                    @foreach($categories->take(5) as $category)
+                                        <div class="mb-2 category-item" data-name="{{ strtolower($category->name) }}">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="category" 
+                                                       value="{{ $category->slug }}" id="cat-{{ $category->id }}"
+                                                       {{ request('category') == $category->slug ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="cat-{{ $category->id }}">
+                                                    {{ $category->name }}
+                                                </label>
+                                            </div>
+                                            @if($category->children->count() > 0)
+                                                <div class="ms-4 mt-1">
+                                                    @foreach($category->children as $child)
+                                                        <div class="form-check category-child" data-name="{{ strtolower($child->name) }}">
+                                                            <input class="form-check-input" type="radio" name="category" 
+                                                                   value="{{ $child->slug }}" id="cat-{{ $child->id }}"
+                                                                   {{ request('category') == $child->slug ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="cat-{{ $child->id }}">
+                                                                {{ $child->name }}
+                                                            </label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </div>
+                                    @endforeach
+                                </div>
+                                @if($categories->count() > 5)
+                                    <div id="categoryMore" class="mt-2">
+                                        <a href="javascript:void(0)" class="text-primary small" onclick="toggleMoreCategories()">
+                                            <span id="categoryToggleText">+{{ $categories->count() - 5 }} danh mục khác</span>
+                                        </a>
+                                    </div>
+                                    <div id="categoryHidden" style="display: none;">
+                                        @foreach($categories->skip(5) as $category)
+                                            <div class="mb-2 category-item" data-name="{{ strtolower($category->name) }}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="category" 
+                                                           value="{{ $category->slug }}" id="cat-{{ $category->id }}"
+                                                           {{ request('category') == $category->slug ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="cat-{{ $category->id }}">
+                                                        {{ $category->name }}
+                                                    </label>
+                                                </div>
+                                                @if($category->children->count() > 0)
+                                                    <div class="ms-4 mt-1">
+                                                        @foreach($category->children as $child)
+                                                            <div class="form-check category-child" data-name="{{ strtolower($child->name) }}">
+                                                                <input class="form-check-input" type="radio" name="category" 
+                                                                       value="{{ $child->slug }}" id="cat-{{ $child->id }}"
+                                                                       {{ request('category') == $child->slug ? 'checked' : '' }}>
+                                                                <label class="form-check-label" for="cat-{{ $child->id }}">
+                                                                    {{ $child->name }}
+                                                                </label>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
                                         @endforeach
                                     </div>
-                                    @endif
-                                </div>
-                                @endforeach
+                                @endif
                             </div>
 
                             <!-- Brands -->
                             <div class="mb-4">
                                 <h6 class="mb-3">Thương hiệu</h6>
-                                @foreach($brands->take(5) as $brand)
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="brand"
-                                        value="{{ $brand->slug }}" id="brand-{{ $brand->id }}"
-                                        {{ request('brand') == $brand->slug ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="brand-{{ $brand->id }}">
-                                        {{ $brand->name }}
-                                    </label>
-                                </div>
-                                @endforeach
                                 @if($brands->count() > 5)
-                                <small class="text-muted">+{{ $brands->count() - 5 }} thương hiệu khác</small>
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control form-control-sm" 
+                                               id="brandSearch" placeholder="Tìm thương hiệu...">
+                                    </div>
+                                @endif
+                                <div id="brandList">
+                                    @foreach($brands->take(5) as $brand)
+                                        <div class="form-check mb-2 brand-item" data-name="{{ strtolower($brand->name) }}">
+                                            <input class="form-check-input" type="radio" name="brand" 
+                                                   value="{{ $brand->slug }}" id="brand-{{ $brand->id }}"
+                                                   {{ request('brand') == $brand->slug ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="brand-{{ $brand->id }}">
+                                                {{ $brand->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if($brands->count() > 5)
+                                    <div id="brandMore" class="mt-2">
+                                        <a href="javascript:void(0)" class="text-primary small" onclick="toggleMoreBrands()">
+                                            <span id="brandToggleText">+{{ $brands->count() - 5 }} thương hiệu khác</span>
+                                        </a>
+                                    </div>
+                                    <div id="brandHidden" style="display: none;">
+                                        @foreach($brands->skip(5) as $brand)
+                                            <div class="form-check mb-2 brand-item" data-name="{{ strtolower($brand->name) }}">
+                                                <input class="form-check-input" type="radio" name="brand" 
+                                                       value="{{ $brand->slug }}" id="brand-{{ $brand->id }}"
+                                                       {{ request('brand') == $brand->slug ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="brand-{{ $brand->id }}">
+                                                    {{ $brand->name }}
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @endif
                             </div>
 
@@ -158,6 +225,32 @@
                                             class="form-control form-control-sm" placeholder="Đến">
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Rating Filter -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Đánh Giá</h6>
+                                @for($i = 5; $i >= 1; $i--)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="rating" 
+                                               value="{{ $i }}" id="rating-{{ $i }}"
+                                               {{ request('rating') == $i ? 'checked' : '' }}>
+                                        <label class="form-check-label d-flex align-items-center" for="rating-{{ $i }}">
+                                            <span style="color: #f0ad4e;" class="me-1">
+                                                @for($j = 1; $j <= 5; $j++)
+                                                    @if($j <= $i)
+                                                        ★
+                                                    @else
+                                                        <span style="color: #ddd;">★</span>
+                                                    @endif
+                                                @endfor
+                                            </span>
+                                            @if($i < 5)
+                                                <small class="text-muted">trở lên</small>
+                                            @endif
+                                        </label>
+                                    </div>
+                                @endfor
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 mb-2">Áp dụng</button>
@@ -274,45 +367,122 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        // Handle product card click
-        $('.product-item').click(function() {
-            var url = $(this).data('url');
-            if (url) {
-                window.location.href = url;
+// Toggle more categories
+var categoriesExpanded = false;
+function toggleMoreCategories() {
+    categoriesExpanded = !categoriesExpanded;
+    if (categoriesExpanded) {
+        $('#categoryHidden').show();
+        $('#categoryToggleText').text('Thu gọn');
+    } else {
+        $('#categoryHidden').hide();
+        $('#categoryToggleText').text('+{{ $categories->count() - 5 }} danh mục khác');
+    }
+}
+
+// Toggle more brands
+var brandsExpanded = false;
+function toggleMoreBrands() {
+    brandsExpanded = !brandsExpanded;
+    if (brandsExpanded) {
+        $('#brandHidden').show();
+        $('#brandToggleText').text('Thu gọn');
+    } else {
+        $('#brandHidden').hide();
+        $('#brandToggleText').text('+{{ $brands->count() - 5 }} thương hiệu khác');
+    }
+}
+
+$(document).ready(function() {
+    // Category search
+    $('#categorySearch').on('input', function() {
+        var searchText = $(this).val().toLowerCase();
+        if (searchText.length > 0) {
+            // Show all categories when searching
+            $('#categoryHidden').show();
+            $('#categoryMore').hide();
+            
+            // Filter categories
+            $('.category-item, .category-child').each(function() {
+                var name = $(this).data('name');
+                if (name.indexOf(searchText) > -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        } else {
+            // Reset to original state
+            if (!categoriesExpanded) {
+                $('#categoryHidden').hide();
             }
-        });
+            $('#categoryMore').show();
+            $('.category-item, .category-child').show();
+        }
+    });
+    
+    // Brand search
+    $('#brandSearch').on('input', function() {
+        var searchText = $(this).val().toLowerCase();
+        if (searchText.length > 0) {
+            // Show all brands when searching
+            $('#brandHidden').show();
+            $('#brandMore').hide();
+            
+            // Filter brands
+            $('.brand-item').each(function() {
+                var name = $(this).data('name');
+                if (name.indexOf(searchText) > -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        } else {
+            // Reset to original state
+            if (!brandsExpanded) {
+                $('#brandHidden').hide();
+            }
+            $('#brandMore').show();
+            $('.brand-item').show();
+        }
+    });
 
-        // Handle wishlist toggle
-        $('.wishlist-toggle').click(function(e) {
-            e.preventDefault();
-
-            const $btn = $(this);
-            const productId = $btn.data('product-id');
-            const isInWishlist = $btn.data('in-wishlist') === 'true' || $btn.data('in-wishlist') === true;
-
-            $.ajax({
-                url: `/wishlist/toggle/${productId}`,
-                type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Update button state
-                        $btn.data('in-wishlist', response.in_wishlist);
-                        $btn.attr('data-in-wishlist', response.in_wishlist);
-
-                        // Update tooltip
-                        $btn.attr('title', response.in_wishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích');
-
-                        // Update wishlist count in header
-                        if (response.count > 0) {
-                            if ($('.wishlist-count').length === 0) {
-                                $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">' + response.count + '</span>');
-                            } else {
-                                $('.wishlist-count').text(response.count).show();
-                            }
+    // Handle product card click
+    $('.product-item').click(function() {
+        var url = $(this).data('url');
+        if (url) {
+            window.location.href = url;
+        }
+    });
+    
+    // Handle wishlist toggle
+    $('.wishlist-toggle').click(function(e) {
+        e.preventDefault();
+        
+        const $btn = $(this);
+        const productId = $btn.data('product-id');
+        const isInWishlist = $btn.data('in-wishlist') === 'true' || $btn.data('in-wishlist') === true;
+        
+        $.ajax({
+            url: `/wishlist/toggle/${productId}`,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update button state
+                    $btn.data('in-wishlist', response.in_wishlist);
+                    $btn.attr('data-in-wishlist', response.in_wishlist);
+                    
+                    // Update tooltip
+                    $btn.attr('title', response.in_wishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích');
+                    
+                    // Update wishlist count in header
+                    if (response.count > 0) {
+                        if ($('.wishlist-count').length === 0) {
+                            $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">' + response.count + '</span>');
                         } else {
                             $('.wishlist-count').remove();
                         }

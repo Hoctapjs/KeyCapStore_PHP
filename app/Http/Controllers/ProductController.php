@@ -61,6 +61,12 @@ class ProductController extends Controller
             });
         }
 
+        // Filter by rating (products with avg rating >= selected value)
+        if ($request->filled('rating') && is_numeric($request->rating)) {
+            $minRating = (int) $request->rating;
+            $query->having('reviews_avg_rating', '>=', $minRating);
+        }
+
         // Search
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
@@ -98,19 +104,31 @@ class ProductController extends Controller
 
         $products = $query->paginate(12);
 
-        // Get filter data - cache for 1 hour
-        $brands = cache()->remember('filter_brands', 3600, function() {
-            return Brand::select('id', 'name', 'slug')->orderBy('name')->get();
-        });
+        // Get filter data - only show categories and brands with products
+        $brands = Brand::select('brands.id', 'brands.name', 'brands.slug')
+            ->join('products', 'brands.id', '=', 'products.brand_id')
+            ->where('products.status', 'active')
+            ->groupBy('brands.id', 'brands.name', 'brands.slug')
+            ->orderBy('brands.name')
+            ->get();
         
-        $categories = cache()->remember('filter_categories', 3600, function() {
-            return Category::select('id', 'name', 'slug', 'parent_id')
-                ->whereNull('parent_id')
-                ->with(['children' => function($query) {
-                    $query->select('id', 'name', 'slug', 'parent_id');
-                }])
-                ->get();
-        });
+        $categories = Category::select('id', 'name', 'slug', 'parent_id')
+            ->whereNull('parent_id')
+            ->whereHas('products', function($query) {
+                $query->where('status', 'active');
+            })
+            ->orWhereHas('children', function($query) {
+                $query->whereHas('products', function($q) {
+                    $q->where('status', 'active');
+                });
+            })
+            ->with(['children' => function($query) {
+                $query->select('id', 'name', 'slug', 'parent_id')
+                    ->whereHas('products', function($q) {
+                        $q->where('status', 'active');
+                    });
+            }])
+            ->get();
         
         $tags = cache()->remember('filter_tags', 3600, function() {
             return ProductTag::select('id', 'name', 'slug')->get();
@@ -126,9 +144,9 @@ class ProductController extends Controller
                 'brand:id,name,slug',
                 'categories:id,name,slug',
                 'tags:id,name,slug',
-                'variants',
+                'variants.images',
                 'productImages' => function($query) {
-                    $query->select('id', 'product_id', 'image_url', 'alt', 'sort_order')
+                    $query->select('id', 'product_id', 'variant_id', 'image_url', 'alt', 'sort_order')
                         ->orderBy('sort_order');
                 }
             ])
