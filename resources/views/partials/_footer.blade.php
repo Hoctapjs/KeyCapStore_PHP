@@ -2,9 +2,14 @@
     <div class="container-fluid">
         <div class="row">
 
+            {{-- Cột 1: Logo & Social Media --}}
             <div class="col-lg-3 col-md-6 col-sm-6">
                 <div class="footer-menu">
-                    <img src="{{ asset('images/logo.png') }}" alt="logo" width="100%">
+                    {{-- Logo trỏ về trang chủ --}}
+                    <a href="{{ route('home') }}">
+                        <img src="{{ asset('images/logo.png') }}" alt="IT KeyCap Logo" width="80%">
+                    </a>
+
                     <div class="social-links mt-5">
                         <ul class="d-flex list-unstyled gap-2">
                             <li>
@@ -40,55 +45,101 @@
                 </div>
             </div>
 
+            {{-- Cột 2: Menu Chính --}}
             <div class="col-md-2 col-sm-6">
                 <div class="footer-menu">
-                    <h5 class="widget-title">Ultras</h5>
+                    <h5 class="widget-title">Về IT KeyCap</h5>
                     <ul class="menu-list list-unstyled">
-                        <li class="menu-item"><a href="#" class="nav-link">About us</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Conditions </a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Our Journals</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Careers</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Affiliate Programme</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Ultras Press</a></li>
+                        <li class="menu-item">
+                            <a href="{{ route('home') }}" class="nav-link">Trang chủ</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('products.index') }}" class="nav-link">Sản phẩm</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('about') }}" class="nav-link">Về chúng tôi</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('contact') }}" class="nav-link">Liên hệ</a>
+                        </li>
                     </ul>
                 </div>
             </div>
 
+            {{-- Cột 3: Tài khoản --}}
             <div class="col-md-2 col-sm-6">
                 <div class="footer-menu">
-                    <h5 class="widget-title">Customer Service</h5>
+                    <h5 class="widget-title">Tài Khoản</h5>
                     <ul class="menu-list list-unstyled">
-                        <li class="menu-item"><a href="#" class="nav-link">FAQ</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Contact</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Privacy Policy</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Returns & Refunds</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Cookie Guidelines</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Delivery Information</a></li>
+                        @auth
+                        {{-- Nếu đã đăng nhập --}}
+                        <li class="menu-item">
+                            <a href="{{ route('account.profile') }}" class="nav-link">Tài khoản của tôi</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('wishlist.index') }}" class="nav-link">Sản phẩm yêu thích</a>
+                        </li>
+                        <li class="menu-item">
+                            {{-- Logout cần form POST để bảo mật --}}
+                            <a href="#" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </li>
+                        @else
+                        {{-- Nếu chưa đăng nhập --}}
+                        <li class="menu-item">
+                            <a href="{{ route('login.form') }}" class="nav-link">Đăng nhập</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('register.form') }}" class="nav-link">Đăng ký</a>
+                        </li>
+                        @endauth
+                        <li class="menu-item">
+                            <a href="{{ route('cart.index') }}" class="nav-link">Giỏ hàng</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('checkout.index') }}" class="nav-link">Thanh toán</a>
+                        </li>
                     </ul>
                 </div>
             </div>
 
+            {{-- Cột 4: Hỗ trợ khách hàng --}}
             <div class="col-md-2 col-sm-6">
                 <div class="footer-menu">
-                    <h5 class="widget-title">Customer Service</h5>
+                    <h5 class="widget-title">Hỗ Trợ Khách Hàng</h5>
                     <ul class="menu-list list-unstyled">
-                        <li class="menu-item"><a href="#" class="nav-link">FAQ</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Contact</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Privacy Policy</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Returns & Refunds</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Cookie Guidelines</a></li>
-                        <li class="menu-item"><a href="#" class="nav-link">Delivery Information</a></li>
+                        <li class="menu-item">
+                            <a href="#" class="nav-link">Câu hỏi thường gặp</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ route('contact') }}" class="nav-link">Gửi hỗ trợ</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="nav-link">Chính sách bảo mật</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="nav-link">Chính sách đổi trả</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="nav-link">Điều khoản dịch vụ</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="nav-link">Hướng dẫn mua hàng</a>
+                        </li>
                     </ul>
                 </div>
             </div>
 
+            {{-- Cột 5: Newsletter --}}
             <div class="col-lg-3 col-md-6 col-sm-6">
                 <div class="footer-menu">
-                    <h5 class="widget-title">Subscribe Us</h5>
-                    <p>Subscribe to our newsletter to get updates about our grand offers.</p>
+                    <h5 class="widget-title">Đăng Ký Nhận Tin</h5>
+                    <p>Đăng ký để nhận thông tin mới nhất về các sản phẩm Keycap độc lạ và ưu đãi hấp dẫn.</p>
                     <form class="d-flex mt-3 gap-0" role="newsletter">
-                        <input class="form-control rounded-start rounded-0 bg-light" type="email" placeholder="Email Address" aria-label="Email Address">
-                        <button class="btn btn-dark rounded-end rounded-0" type="submit">Subscribe</button>
+                        <input class="form-control rounded-start rounded-0 bg-light" type="email" placeholder="Địa chỉ Email của bạn" aria-label="Email Address">
+                        <button class="btn btn-dark rounded-end rounded-0" type="submit">Đăng ký</button>
                     </form>
                 </div>
             </div>

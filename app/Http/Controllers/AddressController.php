@@ -47,6 +47,7 @@ class AddressController extends Controller
         ]);
 
         $validatedData['user_id'] = Auth::id();
+        $validatedData['address_line2'] = $validatedData['address_line2'] ?? 'Không';
 
         if ($request->boolean('is_default')) {
             DB::table('addresses')
@@ -60,7 +61,7 @@ class AddressController extends Controller
 
         Address::create($validatedData);
 
-        return redirect()->route('addresses.index')
+        return redirect()->route('account.profile')
             ->with('success', 'Đã thêm địa chỉ mới thành công!');
     }
 
@@ -102,6 +103,9 @@ class AddressController extends Controller
             'country' => 'required|string|max:100',
             'is_default' => 'nullable|boolean',
         ]);
+
+        $validatedData['address_line2'] = $validatedData['address_line2'] ?? 'Không';
+
 
         if ($request->boolean('is_default')) {
             DB::table('addresses')
