@@ -7,6 +7,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SearchController;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -26,6 +27,11 @@ use App\Http\Controllers\ChatController;
 
 
 Route::get('/', [ProductController::class, 'index'])->name('home');
+
+// Search suggestions API
+Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
+Route::get('/search/brand/{slug}', [SearchController::class, 'productsByBrand'])->name('search.brand');
+Route::get('/search/category/{slug}', [SearchController::class, 'productsByCategory'])->name('search.category');
 
 Route::get('/temp', [HomeController::class, 'temp'])->name('temp');
 

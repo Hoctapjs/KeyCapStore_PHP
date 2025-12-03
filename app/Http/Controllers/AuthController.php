@@ -14,13 +14,16 @@ use App\Models\Address;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+public function register(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed', // Cần có trường `password_confirmation`
         ]);
+
+        // Lưu lại session_id guest trước khi login, kể cả register cũng phải lưu
+        $oldSessionId = $request->session()->getId();
 
         $user = User::create([
             'name' => $validated['name'],
@@ -29,6 +32,8 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+
+        \App\Models\Cart::mergeSessionCartIntoUser($user->id, $oldSessionId);
 
         return redirect('/');
     }
@@ -40,10 +45,16 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Lưu lại session_id cũ của guest (trước khi regenerate)
+        $oldSessionId = $request->session()->getId();
+
         if (Auth::attempt($credentials, $request->boolean('remember_me'))) {
             $request->session()->regenerate();
 
             $user = Auth::user();
+
+            // MERGE CART guest -> user
+            \App\Models\Cart::mergeSessionCartIntoUser($user->id, $oldSessionId);
 
             if ($user->role == 'admin' || $user->role == 'staff') {
                 return redirect()->intended('/admin/dashboard');

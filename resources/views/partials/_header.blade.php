@@ -12,29 +12,24 @@
             </div>
 
             <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
-                <div class="search-bar row bg-light p-2 my-2 rounded-4">
+                <div class="search-bar row bg-light p-2 my-2 rounded-4 position-relative">
                     <div class="col-md-4 d-none d-md-block">
-                        <select class="form-select border-0 bg-transparent">
-                            <option>All Categories</option>
-                            <option>Groceries</option>
-                            <option>Drinks</option>
-                            <option>Chocolates</option>
+                        <select class="form-select border-0 bg-transparent" id="search-category">
+                            <option value="">Tất cả</option>
+                            @php
+                                $searchCategories = \App\Models\Category::whereNull('parent_id')->get();
+                            @endphp
+                            @foreach($searchCategories as $cat)
+                                <option value="{{ $cat->slug }}">{{ $cat->name }}</option>
+                            @endforeach
                         </select>
                     </div>
-                    <!-- <div class="col-11 col-md-7">
-                        <form id="search-form" class="text-center" action="{{ route('products.index') }}" method="get">
-                            <input type="text" name="search" value="{{ request('search') }}" class="form-control border-0 bg-transparent" placeholder="Tìm kiếm sản phẩm..." />
-                        </form>
-                    </div>
-                    <div class="col-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
-                        </svg>
-                    </div> -->
                     <div class="col-11 col-md-7">
                         <form id="search-form" class="text-center" action="{{ route('products.index') }}" method="GET">
+                            <input type="hidden" name="category" id="search-category-input" value="">
                             <input type="text"
                                 name="search"
+                                id="search-input"
                                 value="{{ request('search') }}"
                                 class="form-control border-0 bg-transparent"
                                 placeholder="Tìm kiếm sản phẩm..."
@@ -46,6 +41,34 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
                         </svg>
+                    </div>
+                    
+                    <!-- Search Suggestions Dropdown -->
+                    <div id="search-suggestions" class="search-suggestions-dropdown" style="display: none;">
+                        <div class="suggestions-content">
+                            <!-- Categories Section -->
+                            <div id="suggestions-categories" class="suggestions-section" style="display: none;">
+                                <div class="suggestions-title">Danh mục</div>
+                                <div class="suggestions-list" id="categories-list"></div>
+                            </div>
+                            
+                            <!-- Brands Section -->
+                            <div id="suggestions-brands" class="suggestions-section" style="display: none;">
+                                <div class="suggestions-title">Thương hiệu</div>
+                                <div class="suggestions-list" id="brands-list"></div>
+                            </div>
+                            
+                            <!-- Products Section -->
+                            <div id="suggestions-products" class="suggestions-section" style="display: none;">
+                                <div class="suggestions-title">Sản phẩm gợi ý</div>
+                                <div class="suggestions-products-list" id="products-list"></div>
+                            </div>
+                            
+                            <!-- No Results -->
+                            <div id="no-suggestions" class="text-center py-3 text-muted" style="display: none;">
+                                Không tìm thấy kết quả
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
