@@ -11,19 +11,22 @@
         cursor: pointer;
         position: relative;
     }
+
     .product-item figure {
         margin-bottom: 1rem;
         overflow: hidden;
     }
+
     .product-item h3 {
         min-height: 3em;
         margin-bottom: 0.5rem;
     }
+
     .product-item .price {
         margin-top: auto;
         margin-bottom: 1rem;
     }
-    
+
     /* Wishlist button styles */
     .btn-wishlist {
         z-index: 10;
@@ -38,23 +41,27 @@
         border: none;
         cursor: pointer;
     }
+
     .btn-wishlist:hover {
         background-color: #fff;
         transform: scale(1.1);
     }
+
     .btn-wishlist[data-in-wishlist="true"] {
         background-color: #dc3545;
-        
+
     }
- 
+
     .btn-wishlist[data-in-wishlist="true"] svg {
         fill: #dc3545;
         stroke: #dc3545;
     }
+
     .btn-wishlist[data-in-wishlist="false"] svg {
         fill: none;
         stroke: #333;
     }
+
     .btn-wishlist[data-in-wishlist="false"]:hover svg {
         fill: #dc3545;
         stroke: #dc3545;
@@ -80,13 +87,13 @@
                 <div class="card border-0 mb-4">
                     <div class="card-body">
                         <h5 class="mb-4">Bộ lọc</h5>
-                        
+
                         <form method="GET" action="{{ route('products.index') }}" id="filterForm">
                             <!-- Search -->
                             <div class="mb-4">
                                 <label class="form-label">Tìm kiếm</label>
-                                <input type="text" name="search" value="{{ request('search') }}" 
-                                       class="form-control" placeholder="Tên sản phẩm...">
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    class="form-control" placeholder="Tên sản phẩm...">
                             </div>
 
                             <!-- Categories -->
@@ -210,12 +217,12 @@
                                 <h6 class="mb-3">Khoảng giá</h6>
                                 <div class="row g-2">
                                     <div class="col-6">
-                                        <input type="number" name="min_price" value="{{ request('min_price') }}" 
-                                               class="form-control form-control-sm" placeholder="Từ">
+                                        <input type="number" name="min_price" value="{{ request('min_price') }}"
+                                            class="form-control form-control-sm" placeholder="Từ">
                                     </div>
                                     <div class="col-6">
-                                        <input type="number" name="max_price" value="{{ request('max_price') }}" 
-                                               class="form-control form-control-sm" placeholder="Đến">
+                                        <input type="number" name="max_price" value="{{ request('max_price') }}"
+                                            class="form-control form-control-sm" placeholder="Đến">
                                     </div>
                                 </div>
                             </div>
@@ -260,7 +267,7 @@
                     <p class="text-muted mb-0">Hiển thị {{ $products->count() }} / {{ $products->total() }} sản phẩm</p>
                     <form method="GET" action="{{ route('products.index') }}" class="d-flex align-items-center gap-2">
                         @foreach(request()->except('sort') as $key => $value)
-                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endforeach
                         <label class="mb-0 me-2">Sắp xếp:</label>
                         <select name="sort" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto;">
@@ -276,43 +283,43 @@
                 <!-- Products -->
                 <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
                     @forelse($products as $product)
-                        <div class="col">
-                            <div class="product-item" data-url="{{ route('products.show', $product->slug) }}">
-                                @if($product->stock <= 0)
-                                    <span class="badge bg-danger position-absolute m-3" style="z-index: 5;">Hết hàng</span>
+                    <div class="col">
+                        <div class="product-item" data-url="{{ route('products.show', $product->slug) }}">
+                            @if($product->stock <= 0)
+                                <span class="badge bg-danger position-absolute m-3" style="z-index: 5;">Hết hàng</span>
                                 @endif
                                 @php
-                                    $isInWishlist = auth()->check() && auth()->user()->wishlistProducts->contains($product->id);
+                                $isInWishlist = auth()->check() && auth()->user()->wishlistProducts->contains($product->id);
                                 @endphp
-                                <a href="javascript:void(0)" 
-                                   class="btn-wishlist wishlist-toggle" 
-                                   data-product-id="{{ $product->id }}"
-                                   data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
-                                   title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}"
-                                   onclick="event.stopPropagation();">
+                                <a href="javascript:void(0)"
+                                    class="btn-wishlist wishlist-toggle"
+                                    data-product-id="{{ $product->id }}"
+                                    data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
+                                    title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}"
+                                    onclick="event.stopPropagation();">
                                     <svg width="24" height="24">
                                         <use xlink:href="#heart"></use>
                                     </svg>
                                 </a>
                                 <figure>
-                                        @if($product->productImages->first())
-                                            <img src="{{ $product->productImages->first()->image_url }}" 
-                                                 alt="{{ $product->title }}" class="tab-image" 
-                                                 style="width: 100%; height: 300px; object-fit: cover;">
-                                        @else
-                                            <img src="{{ asset('images/placeholder.svg') }}" 
-                                                 alt="{{ $product->title }}" class="tab-image"
-                                                 style="width: 100%; height: 300px; object-fit: contain; background: #f8f8f8;">
-                                        @endif
+                                    @if($product->productImages->first())
+                                    <img src="{{ $product->productImages->first()->image_url }}"
+                                        alt="{{ $product->title }}" class="tab-image"
+                                        style="width: 100%; height: 300px; object-fit: cover;">
+                                    @else
+                                    <img src="{{ asset('images/placeholder.svg') }}"
+                                        alt="{{ $product->title }}" class="tab-image"
+                                        style="width: 100%; height: 300px; object-fit: contain; background: #f8f8f8;">
+                                    @endif
                                 </figure>
                                 <h3>{{ Str::limit($product->title, 40) }}</h3>
                                 @if($product->brand)
-                                    <span class="qty">{{ $product->brand->name }}</span>
+                                <span class="qty">{{ $product->brand->name }}</span>
                                 @endif
                                 <span class="rating">
                                     <svg width="24" height="24" class="text-primary">
                                         <use xlink:href="#star-solid"></use>
-                                    </svg> 
+                                    </svg>
                                     {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : '0.0' }}
                                 </span>
                                 <span class="price">{{ number_format($product->min_price, 0, ',', '.') }}đ</span>
@@ -334,14 +341,14 @@
                                         <iconify-icon icon="uil:shopping-cart"></iconify-icon>
                                     </a>
                                 </div> -->
-                            </div>
                         </div>
+                    </div>
                     @empty
-                        <div class="col-12">
-                            <div class="text-center py-5">
-                                <p class="text-muted fs-5">Không tìm thấy sản phẩm nào</p>
-                            </div>
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <p class="text-muted fs-5">Không tìm thấy sản phẩm nào</p>
                         </div>
+                    </div>
                     @endforelse
                 </div>
 
@@ -477,24 +484,21 @@ $(document).ready(function() {
                         if ($('.wishlist-count').length === 0) {
                             $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">' + response.count + '</span>');
                         } else {
-                            $('.wishlist-count').text(response.count).show();
+                            $('.wishlist-count').remove();
                         }
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
+                        window.location.href = '{{ route("login.form") }}';
                     } else {
-                        $('.wishlist-count').remove();
+                        alert('Có lỗi xảy ra, vui lòng thử lại');
                     }
                 }
-            },
-            error: function(xhr) {
-                if (xhr.status === 401) {
-                    alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
-                    window.location.href = '{{ route("login.form") }}';
-                } else {
-                    alert('Có lỗi xảy ra, vui lòng thử lại');
-                }
-            }
+            });
         });
     });
-});
 </script>
 @endpush
 

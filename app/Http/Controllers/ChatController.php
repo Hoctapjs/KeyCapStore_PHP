@@ -20,7 +20,7 @@ class ChatController extends Controller
     {
 
         $user = Auth::user();
-        $dailyLimit = 2000;
+        $dailyLimit = 10000;
 
         $cacheKey = 'token_usage_' . $user->id . '_' . now()->format('Y-m-d');
         $usedToday = Cache::get($cacheKey, 0);
@@ -39,7 +39,7 @@ class ChatController extends Controller
         $userMessage = $request->input('message');
 
         // Prompt hệ thống
-        $systemPrompt = "Bạn là trợ lý ảo thông minh của 1 cửa hàng bán keycap tên là ITKeyCap. Hãy trả lời ngắn gọn, nhưng hài hước, có thể dùng meme đang nổi tại việt nam, tập trung vào keycap, mọi câu hỏi không liên quan đều nhận câu trả lời 'Tôi không trả lời câu hỏi nằm ngoài phạm vi'.";
+        $systemPrompt = "Bạn là trợ lý ảo thông minh của 1 cửa hàng bán keycap tên là ITKeyCap. Hãy trả lời ngắn gọn, nhưng hài hước, tập trung vào keycap, switch, bàn phím, mọi câu hỏi không liên quan đều nhận câu trả lời 'Tôi không trả lời câu hỏi nằm ngoài phạm vi'. Với những câu hỏi về tư vấn màu sắc, hãy tư vấn màu sắc bằng tên gọi màu sắc phổ thông trong thực tế";
 
         try {
             // Gọi API bằng Laravel HTTP Client

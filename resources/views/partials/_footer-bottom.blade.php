@@ -1,11 +1,11 @@
 <div id="footer-bottom">
     <div class="container-fluid">
-        <div class="row">
+        <div class="row border-top pt-4 mt-5">
             <div class="col-md-6 copyright">
-                <p>© 2023 Foodmart. All rights reserved.</p>
+                <p class="mb-0 text-muted">© {{ date('Y') }} IT KeyCap. All rights reserved.</p>
             </div>
             <div class="col-md-6 credit-link text-start text-md-end">
-                <p>Free HTML Template by <a href="https://templatesjungle.com/">TemplatesJungle</a> Distributed by <a href="https://themewagon">ThemeWagon</a></p>
+                <p class="mb-0 text-muted">Đam mê bàn phím cơ | <span class="fw-bold">IT KeyCap System</span></p>
             </div>
         </div>
     </div>

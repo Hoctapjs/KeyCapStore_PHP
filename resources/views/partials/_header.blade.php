@@ -6,7 +6,7 @@
                 <div class="main-logo">
                     <a href="{{ route('home') }}">
                         <!-- <img src="images/logo.png" alt="logo" class="img-fluid"> -->
-                        <img src="{{ asset('images/logo.png') }}" alt="logo" class="img-fluid">
+                        <img src="{{ asset('images/logo.png') }}" alt="logo" class="img-fluid" width="80%">
                     </a>
                 </div>
             </div>
@@ -353,11 +353,19 @@
                                     </ul>
                                 </li>
 
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a href="/accessories" class="nav-link">Phụ kiện</a>
+                                </li> -->
+
+                                <li class="nav-item">
+                                    <a href="/about" class="nav-link">Về chúng tôi</a>
                                 </li>
 
-                                <li class="nav-item dropdown">
+                                <li class="nav-item">
+                                    <a href="/contact" class="nav-link">Liên hệ</a>
+                                </li>
+
+                                <!-- <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Trang</a>
                                     <ul class="dropdown-menu" aria-labelledby="pages">
                                         <li><a href="about.html" class="dropdown-item">Về chúng tôi</a></li>
@@ -367,15 +375,15 @@
                                         <li><a href="account.html" class="dropdown-item">Tài khoản</a></li>
                                         <li><a href="contact.html" class="dropdown-item">Liên hệ</a></li>
                                     </ul>
-                                </li>
+                                </li> -->
 
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a href="/sale" class="nav-link">Sale</a>
                                 </li>
 
                                 <li class="nav-item">
                                     <a href="/blog" class="nav-link">Blog</a>
-                                </li>
+                                </li> -->
                             </ul>
 
                         </div>

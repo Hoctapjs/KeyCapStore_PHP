@@ -216,3 +216,8 @@ Route::middleware('auth')->group(function () {
 // Chat
 Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
 Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+
+// About, Contect
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [HomeController::class, 'submit'])->name('contact.submit');
