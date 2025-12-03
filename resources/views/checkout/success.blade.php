@@ -22,6 +22,35 @@
 
     <p><strong>Tổng thanh toán: {{ number_format($order->total, 0, ',', '.') }}₫</strong></p>
 
+    @php
+    $payment = $order->payments->first();
+    @endphp
+
+    @if($payment)
+    <p>Phương thức thanh toán:
+        <strong>
+            @switch($payment->method)
+            @case('cod') Thanh toán khi nhận hàng (COD) @break
+            @case('bank_transfer') Thanh toán online (VNPay) @break
+            @case('momo') Ví MoMo @break
+            @default {{ $payment->method }}
+            @endswitch
+        </strong>
+    </p>
+
+    <p>Trạng thái thanh toán:
+        <strong>
+            @switch($payment->status)
+            @case('pending') Chờ thanh toán @break
+            @case('paid') Đã thanh toán @break
+            @case('failed') Thất bại @break
+            @case('refunded') Đã hoàn tiền @break
+            @default {{ $payment->status }}
+            @endswitch
+        </strong>
+    </p>
+    @endif
+
     @if($order->orderCoupons->count())
     <p>
         Mã đã sử dụng:

@@ -8,6 +8,8 @@ use App\Models\CouponRedemption;
 use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Payment;
+use App\Services\VnPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -59,6 +61,7 @@ class CheckoutController extends Controller
             'address'      => 'required|string|max:500',
             'note'         => 'nullable|string',
             'coupon_code'  => 'nullable|string|max:50',
+            'payment_method' => 'required|in:cod,vnpay,momo',
         ]);
 
         $cartItems = $cart->items;
@@ -238,12 +241,62 @@ class CheckoutController extends Controller
             ]);
         }
 
+        // 8. Tạo record thanh toán (payments)
+        $paymentMethod = $data['payment_method'] ?? 'cod';
+
+        // Lưu ý: enum method hiện tại: 'cod','bank_transfer','paypal','stripe','momo','zalopay'
+        // Nếu bạn muốn thêm 'vnpay' đúng nghĩa, sau này chỉnh lại enum migration.
+        // Tạm thời: dùng 'bank_transfer' cho VNPay, 'momo' cho MoMo.
+
+        $payment = Payment::create([
+            'order_id'       => $order->id,
+            'method'         => $paymentMethod === 'vnpay' ? 'bank_transfer' : $paymentMethod,
+            'amount'         => $total,
+            'status'         => 'pending', // chờ thanh toán
+            'transaction_id' => null,
+            'raw_payload'    => null,
+            'paid_at'        => null,
+        ]);
+
+        // 9. Tuỳ theo phương thức thanh toán
+        if ($paymentMethod === 'cod') {
+            // COD: coi như tạo đơn thành công, chưa thu tiền
+            // Bạn có thể để status 'pending' hoặc 'processing' tuỳ quy ước
+            $order->update(['status' => 'pending']);
+
+            // Clear giỏ
+            $cart->items()->delete();
+
+            return redirect()->route('checkout.success', $order)
+                ->with('success', 'Đặt hàng thành công! Thanh toán khi nhận hàng.');
+        }
+
+        if ($paymentMethod === 'vnpay') {
+            // VNPay: redirect sang cổng thanh toán
+            $vnpUrl = VnPayService::createPaymentUrl(
+                $order,
+                $payment->id,
+                $request->ip()
+            );
+
+            // Không clear giỏ ngay, chờ thanh toán thành công rồi hãy clear trong callback
+            return redirect()->away($vnpUrl);
+        }
+
+        if ($paymentMethod === 'momo') {
+            // TODO: tích hợp MoMo sau (flow tương tự VNPay: tạo payment, build URL, redirect)
+            // Tạm thời báo chưa hỗ trợ:
+            return back()->withErrors([
+                'payment_method' => 'Thanh toán MoMo hiện chưa được kích hoạt.'
+            ]);
+        }
+
         // 8. Clear giỏ
-        $cart->items()->delete();
+        // $cart->items()->delete();
 
         // 9. Redirect tới trang success
-        return redirect()->route('checkout.success', $order)
-            ->with('success', 'Đặt hàng thành công!');
+        // return redirect()->route('checkout.success', $order)
+        //     ->with('success', 'Đặt hàng thành công!');
     }
 
 
@@ -255,5 +308,87 @@ class CheckoutController extends Controller
         }
 
         return view('checkout.success', compact('order'));
+    }
+
+    public function vnpayReturn(Request $request)
+    {
+        $vnpData = $request->all();
+
+        \Log::info('VNPay return', $vnpData);
+
+        $hashSecret = config('vnpay.vnp_hash_secret');
+
+        // Lấy tất cả các tham số bắt đầu bằng vnp_
+        $inputData = [];
+        foreach ($vnpData as $key => $value) {
+            if (strpos($key, 'vnp_') === 0) {
+                $inputData[$key] = $value;
+            }
+        }
+
+        $vnpSecureHash = $inputData['vnp_SecureHash'] ?? '';
+        unset($inputData['vnp_SecureHash'], $inputData['vnp_SecureHashType']);
+
+        ksort($inputData);
+
+        $hashDataArr = [];
+        foreach ($inputData as $key => $value) {
+            $hashDataArr[] = urlencode($key) . '=' . urlencode($value);
+        }
+        $hashData = implode('&', $hashDataArr);
+
+        $myHash = hash_hmac('sha512', $hashData, $hashSecret);
+
+        if (strcasecmp($myHash, $vnpSecureHash) !== 0) {
+            // Sai chữ ký => về /checkout
+            return redirect()->route('checkout.index')
+                ->with('error', 'Không xác thực được chữ ký VNPay.');
+        }
+
+        // Đến đây là chữ ký OK, không còn sai nữa nên trả về trang thanh toán thành công
+        $paymentId     = $vnpData['vnp_TxnRef'] ?? null;
+        $responseCode  = $vnpData['vnp_ResponseCode'] ?? '99';
+        $transactionNo = $vnpData['vnp_TransactionNo'] ?? null;
+
+        $payment = Payment::find($paymentId);
+        if (!$payment) {
+            return redirect()->route('home')
+                ->with('error', 'Không tìm thấy giao dịch thanh toán.');
+        }
+
+        $order = $payment->order;
+        if (!$order) {
+            return redirect()->route('home')
+                ->with('error', 'Không tìm thấy đơn hàng.');
+        }
+
+        if ($responseCode === '00') {
+            // THÀNH CÔNG
+            $payment->update([
+                'status'         => 'paid',
+                'transaction_id' => $transactionNo,
+                'raw_payload'    => $vnpData,
+                'paid_at'        => now(),
+            ]);
+
+            $order->update(['status' => 'paid']);
+
+            if (Auth::check()) {
+                $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
+                $cart->items()->delete();
+            }
+
+            return redirect()->route('checkout.success', $order)
+                ->with('success', 'Thanh toán VNPay thành công!');
+        } else {
+            // THẤT BẠI / HỦY
+            $payment->update([
+                'status'      => 'failed',
+                'raw_payload' => $vnpData,
+            ]);
+
+            return redirect()->route('checkout.index')
+                ->with('error', 'Thanh toán VNPay thất bại hoặc bị huỷ. Vui lòng thử lại.');
+        }
     }
 }

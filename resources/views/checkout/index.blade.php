@@ -55,6 +55,57 @@
                             <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <!-- Chọn phương thức thanh toán -->
+                        @if(session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                        @endif
+
+                        @if(session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        <div class="mb-3">
+                            <label class="form-label">Phương thức thanh toán</label>
+
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="payment_method"
+                                    id="pm_cod"
+                                    value="cod"
+                                    {{ old('payment_method', 'cod') === 'cod' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="pm_cod">
+                                    Thanh toán khi nhận hàng (COD)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="payment_method"
+                                    id="pm_vnpay"
+                                    value="vnpay"
+                                    {{ old('payment_method') === 'vnpay' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="pm_vnpay">
+                                    Thanh toán online qua VNPay
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="payment_method"
+                                    id="pm_momo"
+                                    value="momo"
+                                    {{ old('payment_method') === 'momo' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="pm_momo">
+                                    Thanh toán ví MoMo (dự kiến)
+                                </label>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

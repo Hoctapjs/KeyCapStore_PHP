@@ -195,6 +195,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 });
 
+// Payment
+Route::get('/payment/vnpay/return', [CheckoutController::class, 'vnpayReturn'])
+    ->name('payment.vnpay.return');
+
 // Review routes
 Route::middleware('auth')->group(function () {
     Route::get('/products/{product}/review', [ReviewController::class, 'create'])->name('review.create');
