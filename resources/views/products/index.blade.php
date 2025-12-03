@@ -459,6 +459,7 @@ $(document).ready(function() {
     // Handle wishlist toggle
     $('.wishlist-toggle').click(function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         const $btn = $(this);
         const productId = $btn.data('product-id');
@@ -484,21 +485,24 @@ $(document).ready(function() {
                         if ($('.wishlist-count').length === 0) {
                             $('a[title="Danh sách yêu thích"]').append('<span class="wishlist-count position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #dc3545 !important;">' + response.count + '</span>');
                         } else {
-                            $('.wishlist-count').remove();
+                            $('.wishlist-count').text(response.count).show();
                         }
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 401) {
-                        alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
-                        window.location.href = '{{ route("login.form") }}';
                     } else {
-                        alert('Có lỗi xảy ra, vui lòng thử lại');
+                        $('.wishlist-count').remove();
                     }
                 }
-            });
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
+                    window.location.href = '{{ route("login.form") }}';
+                } else {
+                    alert('Có lỗi xảy ra, vui lòng thử lại');
+                }
+            }
         });
     });
+});
 </script>
 @endpush
 
