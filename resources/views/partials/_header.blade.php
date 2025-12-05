@@ -1,5 +1,5 @@
 <header>
-    <div class="container-fluid">
+    <div class="container-fluid fixed-top bg-white shadow-sm" style="z-index: 9999;">
         <div class="row py-3 border-bottom">
 
             <div class="col-sm-4 col-lg-3 text-center text-sm-start">
@@ -298,7 +298,7 @@
         </div>
     </div> -->
 
-    <div class="container-fluid">
+    <div class="container-fluid" style="margin-top: 120px;">
         <div class="row py-3">
             <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
                 <nav class="main-menu d-flex navbar navbar-expand-lg">
