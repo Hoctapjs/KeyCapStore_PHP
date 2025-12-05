@@ -143,6 +143,7 @@
                 📦 Quản lý sản phẩm
             </a>
 
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('admin.categories.index') }}" class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                 📁 Quản lý danh mục
             </a>
@@ -150,11 +151,13 @@
             <a href="{{ route('admin.brands.index') }}" class="nav-item {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
                 🏷️ Quản lý thương hiệu
             </a>
+            @endif
 
             <a href="{{ route('admin.inventory.index') }}" class="nav-item {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}">
                 📈 Quản lý tồn kho
             </a>
 
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('admin.reviews.index') }}" class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
                 ⭐ Quản lý đánh giá
             </a>
@@ -166,6 +169,7 @@
             <a href="{{ route('admin.tags.index') }}" class="nav-item {{ request()->routeIs('admin.tags.*') ? 'active' : '' }}">
                 🏷️ Quản lý tag
             </a>
+            @endif
 
             <a href="{{ route('admin.orders.index') }}" class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 📋 Quản lý đơn hàng

@@ -129,7 +129,7 @@
             max-width: 320px;
             height: 100vh;
             background: #fff;
-            z-index: 1050;
+            z-index: 10100;
             transition: left 0.3s ease;
             overflow-y: auto;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -147,7 +147,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 1040;
+            z-index: 10090;
         }
 
         .filter-overlay.show {

@@ -4,6 +4,31 @@
 <head>
     @include('partials._head')
     <style>
+
+        @media (max-width: 991.98px) {
+            body {
+                padding-top: 80px; /* Header nhỏ hơn trên mobile */
+            }
+        }
+        
+        /* Đảm bảo offcanvas hiển thị trên header (header có z-index 9999) */
+        .offcanvas {
+            z-index: 99999 !important;
+        }
+        
+        .offcanvas-backdrop {
+            z-index: 99998 !important;
+        }
+        
+        .offcanvas-backdrop.show {
+            z-index: 99998 !important;
+        }
+        
+        /* Dropdown menu z-index cao hơn header */
+        .dropdown-menu {
+            z-index: 10060 !important;
+        }
+        
         .redtitle {
             color: #73c94c !important;
         }
@@ -193,9 +218,10 @@
         function updateCartUI() {
             $.get("{{ route('cart.ajax.info') }}", function(data) {
 
-                // cập nhật header nhỏ trên navbar
-                $(".dropdown-toggle").text(`Your Cart (${data.cartCount})`);
-                $(".cart-total").text(data.cartTotal);
+                // cập nhật header nhỏ trên navbar - chỉ target cart header, không phải menu dropdown
+                $("#header-cart-count").text(`Your Cart (${data.cartCount})`);
+                $("#header-cart-total").text(data.cartTotal);
+                $("#cart-count-mobile").text(data.cartCount).removeClass('d-none');
                 $("#offcanvasCart .badge").text(data.cartCount);
 
                 // build HTML item trong offcanvas

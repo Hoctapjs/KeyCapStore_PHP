@@ -111,7 +111,7 @@ Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('cat
 // Admin Routes - Product Management
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])->group(function () {
 
-    // Dashboard
+    // Dashboard - both admin and staff
     Route::get('/dashboard', function () {
         $totalProducts = \App\Models\Product::count();
         $totalCategories = \App\Models\Category::count();
@@ -121,11 +121,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         return view('admin.dashboard', compact('totalProducts', 'totalCategories', 'totalBrands', 'lowStockProducts'));
     })->name('dashboard');
 
-    // Products
+    // Products - both admin and staff
     Route::resource('products', AdminProductController::class);
     Route::delete('products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.images.delete');
 
-    // Product Variants (nested resource)
+    // Product Variants (nested resource) - both admin and staff
     Route::prefix('products/{product}/variants')->name('products.variants.')->group(function () {
         Route::get('/', [AdminProductVariantController::class, 'index'])->name('index');
         Route::get('/create', [AdminProductVariantController::class, 'create'])->name('create');
@@ -135,34 +135,37 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])
         Route::delete('/{variant}', [AdminProductVariantController::class, 'destroy'])->name('destroy');
     });
 
-    // Categories
-    Route::resource('categories', AdminCategoryController::class);
-
-    // Brands
-    Route::resource('brands', AdminBrandController::class);
-
-    // Inventory Management
+    // Inventory Management - both admin and staff
     Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('inventory/adjust-variant', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust-variant');
     Route::get('inventory/{product}', [AdminInventoryController::class, 'show'])->name('inventory.show');
     Route::post('inventory/{product}/update-stock', [AdminInventoryController::class, 'updateStock'])->name('inventory.update-stock');
     Route::post('inventory/variant/{variant}/update-stock', [AdminInventoryController::class, 'updateVariantStock'])->name('inventory.update-variant-stock');
 
-    // Reviews Management
+    // Orders Management - both admin and staff
+    Route::resource('orders', AdminOrderController::class);
+    Route::patch('orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+});
+
+// Admin Only Routes
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    // Categories - admin only
+    Route::resource('categories', AdminCategoryController::class);
+
+    // Brands - admin only
+    Route::resource('brands', AdminBrandController::class);
+
+    // Reviews Management - admin only
     Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
     Route::patch('reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
     Route::patch('reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('reviews.reject');
     Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    // Coupons Management
+    // Coupons Management - admin only
     Route::resource('coupons', AdminCouponController::class);
 
-    // Tags Management
+    // Tags Management - admin only
     Route::resource('tags', AdminTagController::class);
-
-    // Orders Management
-    Route::resource('orders', AdminOrderController::class);
-    Route::patch('orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
 });
 
 // Route cho Cart (chức năng liên quan đến giỏ hàng)

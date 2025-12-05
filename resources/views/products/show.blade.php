@@ -606,22 +606,10 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-5">
 
-                            <!-- Header + Write Review Button -->
-                            <div class="d-flex justify-content-between align-items-center mb-5">
-                                <div>
-                                    <h3 class="fw-bold mb-1">Đánh giá sản phẩm ({{ $totalReviews }})</h3>
-                                    <p class="text-muted mb-0">Đánh giá từ khách hàng đã mua hàng</p>
-                                </div>
-
-                                @auth
-                                    <a href="{{ route('review.create', ['product' => $product->id]) }}" class="btn btn-primary btn-lg px-5">
-                                        <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
-                                    </a>
-                                @else
-                                    <a href="{{ route('login.form') }}" class="btn btn-outline-primary btn-lg px-5">
-                                        <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập để đánh giá
-                                    </a>
-                                @endauth
+                            <!-- Header -->
+                            <div class="mb-5">
+                                <h3 class="fw-bold mb-1">Đánh giá sản phẩm ({{ $totalReviews }})</h3>
+                                <p class="text-muted mb-0">Đánh giá từ khách hàng đã mua hàng</p>
                             </div>
 
                             <!-- Rating Summary -->

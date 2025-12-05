@@ -104,7 +104,7 @@
                             </svg>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown" style="right: 0; left: auto;">
                             @auth
                             <!-- <li><span class="dropdown-item-text">Chào, {{ Auth::user()->name }}</span></li> -->
                             <!-- <li>
@@ -163,10 +163,13 @@
                         </a>
                     </li>
                     <li class="d-lg-none">
-                        <a href="#" class="rounded-circle bg-light p-2 mx-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
+                        <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                             <svg width="24" height="24" viewBox="0 0 24 24">
                                 <use xlink:href="#cart"></use>
                             </svg>
+                            <span id="cart-count-mobile" class="cart-count-mobile position-absolute top-0 start-100 translate-middle badge rounded-pill {{ $cartCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; background-color: #dc3545 !important;">
+                                {{ $cartCount }}
+                            </span>
                         </a>
                     </li>
                     <li class="d-lg-none">
@@ -214,9 +217,9 @@
                         data-bs-target="#offcanvasCart"
                         aria-controls="offcanvasCart">
 
-                        <span class="fs-6 text-muted dropdown-toggle">Your Cart ({{ $cartCount }})</span>
+                        <span id="header-cart-count" class="fs-6 text-muted">Your Cart ({{ $cartCount }})</span>
 
-                        <span class="cart-total fs-5 fw-bold">
+                        <span id="header-cart-total" class="cart-total fs-5 fw-bold">
                             {{ number_format($cartTotal, 0, ',', '.') }}đ
                         </span>
                     </button>
@@ -298,9 +301,16 @@
         </div>
     </div> -->
 
-    <div class="container-fluid" style="margin-top: 120px;">
+    @php
+        // Load danh mục từ database cho menu
+        $menuCategories = \App\Models\Category::whereNull('parent_id')
+            ->with('children')
+            ->get();
+    @endphp
+
+    <div class="container-fluid" style="margin-top: 120px; position: relative; z-index: 1;">
         <div class="row py-3">
-            <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
+            <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
                 <nav class="main-menu d-flex navbar navbar-expand-lg">
 
                     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
@@ -308,89 +318,98 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                    <!-- Menu Desktop - hiển thị trên lg trở lên -->
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <select class="filter-categories border-0 mb-0 me-5" onchange="if(this.value) window.location.href=this.value">
+                            <option value="">Danh mục sản phẩm</option>
+                            @foreach($menuCategories as $menuCat)
+                                <option value="{{ route('products.index', ['category' => $menuCat->slug]) }}">{{ $menuCat->name }}</option>
+                            @endforeach
+                        </select>
 
-                        <div class="offcanvas-header justify-content-center">
-                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                        </div>
+                        <ul class="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
+                            <li class="nav-item {{ request()->routeIs('home') ? 'active' : '' }}">
+                                <a href="/" class="nav-link">Trang chủ</a>
+                            </li>
 
-                        <div class="offcanvas-body">
+                            @foreach($menuCategories as $menuCat)
+                                @if($menuCat->children->count() > 0)
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $menuCat->name }}</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="{{ route('products.index', ['category' => $menuCat->slug]) }}" class="dropdown-item">Tất cả {{ $menuCat->name }}</a></li>
+                                            @foreach($menuCat->children as $childCat)
+                                                <li><a href="{{ route('products.index', ['category' => $childCat->slug]) }}" class="dropdown-item">{{ $childCat->name }}</a></li>
+                                            @endforeach
+                                        </ul>
+                                    </li>
+                                @else
+                                    <li class="nav-item">
+                                        <a href="{{ route('products.index', ['category' => $menuCat->slug]) }}" class="nav-link">{{ $menuCat->name }}</a>
+                                    </li>
+                                @endif
+                            @endforeach
 
-                            <select class="filter-categories border-0 mb-0 me-5">
-                                <option>Danh mục sản phẩm</option>
-                                <option>Keycaps</option>
-                                <option>Switches (Công tắc)</option>
-                                <option>Keyboard Kits (Phím)</option>
-                                <option>Phụ kiện (Accessories)</option>
-                                <option>Artisan Keycaps</option>
-                                <option>Desk Mats (Lót chuột)</option>
-                            </select>
+                            <li class="nav-item {{ request()->routeIs('about') ? 'active' : '' }}">
+                                <a href="/about" class="nav-link">Về chúng tôi</a>
+                            </li>
 
-                            <ul class="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
-
-                                <li class="nav-item active">
-                                    <a href="/" class="nav-link">Trang chủ</a>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Keycaps</a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="/keycaps-profile-cherry" class="dropdown-item">Profile: Cherry</a></li>
-                                        <li><a href="/keycaps-profile-sa" class="dropdown-item">Profile: SA</a></li>
-                                        <li><a href="/keycaps-profile-xda" class="dropdown-item">Profile: XDA</a></li>
-                                        <li><a href="/keycaps-pbt" class="dropdown-item">Chất liệu: PBT</a></li>
-                                        <li><a href="/keycaps-abs" class="dropdown-item">Chất liệu: ABS</a></li>
-                                        <li><a href="/keycaps-artisan" class="dropdown-item">Artisan Keycaps</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Switches</a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="/products?category=linear-switches" class="dropdown-item">Linear</a></li>
-                                        <li><a href="/products?category=tactile-switches" class="dropdown-item">Tactile</a></li>
-                                        <li><a href="/products?category=clicky-switches" class="dropdown-item">Clicky</a></li>
-                                    </ul>
-                                </li>
-
-                                <!-- <li class="nav-item">
-                                    <a href="/accessories" class="nav-link">Phụ kiện</a>
-                                </li> -->
-
-                                <li class="nav-item">
-                                    <a href="/about" class="nav-link">Về chúng tôi</a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a href="/contact" class="nav-link">Liên hệ</a>
-                                </li>
-
-                                <!-- <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Trang</a>
-                                    <ul class="dropdown-menu" aria-labelledby="pages">
-                                        <li><a href="about.html" class="dropdown-item">Về chúng tôi</a></li>
-                                        <li><a href="shop.html" class="dropdown-item">Cửa hàng</a></li>
-                                        <li><a href="cart.html" class="dropdown-item">Giỏ hàng</a></li>
-                                        <li><a href="checkout.html" class="dropdown-item">Thanh toán</a></li>
-                                        <li><a href="account.html" class="dropdown-item">Tài khoản</a></li>
-                                        <li><a href="contact.html" class="dropdown-item">Liên hệ</a></li>
-                                    </ul>
-                                </li> -->
-
-                                <!-- <li class="nav-item">
-                                    <a href="/sale" class="nav-link">Sale</a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a href="/blog" class="nav-link">Blog</a>
-                                </li> -->
-                            </ul>
-
-                        </div>
-
+                            <li class="nav-item {{ request()->routeIs('contact') ? 'active' : '' }}">
+                                <a href="/contact" class="nav-link">Liên hệ</a>
+                            </li>
+                        </ul>
                     </div>
                 </nav>
             </div>
+        </div>
+    </div>
+    
+    <!-- Offcanvas Menu Mobile - đặt ngoài container để z-index hoạt động đúng -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel" style="z-index: 99999;">
+
+        <div class="offcanvas-header justify-content-center">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            <select class="filter-categories border-0 mb-0 me-5 w-100 mb-3" onchange="if(this.value) window.location.href=this.value">
+                <option value="">Danh mục sản phẩm</option>
+                @foreach($menuCategories as $menuCat)
+                    <option value="{{ route('products.index', ['category' => $menuCat->slug]) }}">{{ $menuCat->name }}</option>
+                @endforeach
+            </select>
+
+            <ul class="navbar-nav menu-list list-unstyled mb-0">
+                <li class="nav-item {{ request()->routeIs('home') ? 'active' : '' }}">
+                    <a href="/" class="nav-link">Trang chủ</a>
+                </li>
+
+                @foreach($menuCategories as $menuCat)
+                    @if($menuCat->children->count() > 0)
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $menuCat->name }}</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ route('products.index', ['category' => $menuCat->slug]) }}" class="dropdown-item">Tất cả {{ $menuCat->name }}</a></li>
+                                @foreach($menuCat->children as $childCat)
+                                    <li><a href="{{ route('products.index', ['category' => $childCat->slug]) }}" class="dropdown-item">{{ $childCat->name }}</a></li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a href="{{ route('products.index', ['category' => $menuCat->slug]) }}" class="nav-link">{{ $menuCat->name }}</a>
+                        </li>
+                    @endif
+                @endforeach
+
+                <li class="nav-item {{ request()->routeIs('about') ? 'active' : '' }}">
+                    <a href="/about" class="nav-link">Về chúng tôi</a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('contact') ? 'active' : '' }}">
+                    <a href="/contact" class="nav-link">Liên hệ</a>
+                </li>
+            </ul>
         </div>
     </div>
 </header>
