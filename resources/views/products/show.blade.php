@@ -177,14 +177,65 @@
         stroke: #dc3545;
     }
 
-    .star {
-    color: #ddd;
-    font-size: 1.2rem;
+    .review-content-wrapper {
+        display: block;
+        max-height: 180px;
+        overflow: hidden;
+        position: relative;
+        border-radius: 8px;
     }
 
-    .star.filled {
-        color: #ffc107;
+    .review-content-scroll {
+        display: block;
+        max-height: 100%;
+        overflow-y: auto;
+        padding-right: 12px;
+        margin-right: -12px;
+        line-height: 1.6;
+        word-break: break-word;
+        hyphens: auto;
     }
+
+    .review-content-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+    .review-content-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .review-content-scroll::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+    .review-content-scroll::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .review-content-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+
+    .review-content-scroll p {
+        margin: 0;
+        word-break: break-word;
+    }
+
+        .review-title {
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+        .star.filled {
+            color: #ffc107;
+            text-shadow: 0 0 6px rgba(255,193,7,0.4);
+        }
 </style>
 @endpush
 
@@ -633,27 +684,25 @@
                                 @forelse($reviews as $review)
                                     <div class="card border-0 shadow-sm mb-4 hover-lift">
                                         <div class="card-body p-4">
-                                            <div class="row">
+                                            <div class="row g-4">
                                                 <!-- LEFT COLUMN: User + Time -->
-                                                <div class="col-lg-3 text-center text-lg-start mb-4 mb-lg-0">
-                                                    <div class="d-flex flex-column align-items-center align-items-lg-start">
-                                                        {{-- <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                                            <i class="bi bi-person-circle fs-1 text-muted"></i>
+                                                <div class="col-lg-3">
+                                                    <div class="text-center text-lg-start">
+                                                        {{-- <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                                            <i class="bi bi-person-fill fs-3 text-muted"></i>
                                                         </div> --}}
-                                                        <strong class="fs-5 text-dark">{{ $review->user->name }}</strong>
-                                                        <small class="text-muted">
-                                                            {{ $review->created_at->format('d/m/Y') }}<br>
-                                                            <span class="text-primary fw-semibold">{{ $review->created_at->format('H:i') }}</span>
-                                                        </small>
+                                                        <strong class="d-block fs-5 text-dark">{{ $review->user->name }}</strong>
+                                                        <small class="text-muted d-block">{{ $review->created_at->format('d/m/Y') }}</small>
+                                                        <small class="text-primary fw-semibold">{{ $review->created_at->format('H:i') }}</small>
                                                     </div>
                                                 </div>
 
                                                 <!-- RIGHT COLUMN: Star + Title + Content -->
                                                 <div class="col-lg-9">
-                                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                                        <div>
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="flex-grow-1 me-3">
                                                             <!-- Star -->
-                                                            <div class="star-rating-display mb-2">
+                                                            <div class="star-rating-display mb-3">
                                                                 @for($i = 1; $i <= 5; $i++)
                                                                     <span class="star {{ $i <= $review->rating ? 'filled' : '' }}">★</span>
                                                                 @endfor
@@ -661,19 +710,25 @@
 
                                                             <!-- Title -->
                                                             @if($review->title)
-                                                                <h6 class="fw-bold text-primary mb-2">{{ $review->title }}</h6>
+                                                                <h6 class="fw-bold text-primary mb-3 review-title fs-5">
+                                                                    {{ $review->title }}
+                                                                </h6>
                                                             @endif
 
                                                             <!-- Content -->
-                                                            <p class="text-dark lh-lg mb-0">{{ $review->content }}</p>
+                                                            <div class="review-content-wrapper">
+                                                                <div class="review-content-scroll">
+                                                                    <p class="text-dark mb-0">{{ $review->content }}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
 
                                                         <!-- The Edit button is only visible to the owner -->
                                                         @auth
                                                             @if(auth()->id() === $review->user_id)
                                                                 <a href="{{ route('review.edit', ['product' => $product->id, 'review' => $review->id]) }}"
-                                                                class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                                                                title="Chỉnh sửa đánh giá">
+                                                                class="btn btn-sm btn-outline-secondary flex-shrink-0 d-flex align-items-center gap-1"
+                                                                title="Chỉnh sửa">
                                                                     <i class="bi bi-pencil"></i>
                                                                     <span class="d-none d-md-inline">Sửa</span>
                                                                 </a>

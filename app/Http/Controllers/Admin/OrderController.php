@@ -20,12 +20,12 @@ class OrderController extends Controller
         // Search by order code or customer name
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('code', 'LIKE', "%{$search}%")
-                  ->orWhereHas('user', function($uq) use ($search) {
-                      $uq->where('name', 'LIKE', "%{$search}%")
-                         ->orWhere('email', 'LIKE', "%{$search}%");
-                  });
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('email', 'LIKE', "%{$search}%");
+                    });
             });
         }
 
@@ -60,7 +60,7 @@ class OrderController extends Controller
                 break;
         }
 
-        $orders = $query->paginate(20);
+        $orders = $query->paginate(10);
 
         // Get order statistics
         $stats = [
@@ -81,7 +81,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['user', 'items.product', 'items.variant', 'payments', 'shipment', 'coupons']);
-        
+
         return view('admin.orders.show', compact('order'));
     }
 
@@ -91,7 +91,7 @@ class OrderController extends Controller
     public function edit(Order $order)
     {
         $order->load(['user', 'items.product', 'items.variant']);
-        
+
         $statuses = [
             'pending' => 'Chờ xử lý',
             'paid' => 'Đã thanh toán',
@@ -101,7 +101,7 @@ class OrderController extends Controller
             'cancelled' => 'Đã hủy',
             'refunded' => 'Đã hoàn tiền',
         ];
-        
+
         return view('admin.orders.edit', compact('order', 'statuses'));
     }
 

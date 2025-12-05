@@ -1,10 +1,57 @@
 @extends('layouts.admin')
 
 @section('title', 'Quản lý đánh giá')
-@section('page-title', 'Quản lý đánh giá')
 
 @section('content')
 <div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý đánh giá</h1>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4 g-3">
+        <!-- Tổng số đánh giá -->
+        <div class="col-xl-3 col-md-6 col-12">
+            <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 fw-bold mb-2">{{ number_format($stats['total']) }}</div>
+                    <small class="opacity-90 text-white">Tổng đánh giá</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chờ duyệt -->
+        <div class="col-xl-3 col-md-6 col-12">
+            <div class="card border-0 shadow-sm bg-warning text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 fw-bold mb-2">{{ number_format($stats['pending']) }}</div>
+                    <small class="opacity-90 text-white">Chờ duyệt</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đã duyệt -->
+        <div class="col-xl-3 col-md-6 col-12">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 fw-bold mb-2">{{ number_format($stats['approved']) }}</div>
+                    <small class="opacity-90 text-white">Đã duyệt</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bị từ chối -->
+        <div class="col-xl-3 col-md-6 col-12">
+            <div class="card border-0 shadow-sm bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 fw-bold mb-2">{{ number_format($stats['rejected']) }}</div>
+                    <small class="opacity-90 text-white">Bị từ chối</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
@@ -15,7 +62,7 @@
                     <!-- Filters -->
                     <form method="GET" class="row g-3 mb-4">
                         <div class="col-md-3">
-                            <input type="text" name="search" class="form-control" 
+                            <input type="text" name="search" class="form-control"
                                    placeholder="Tìm kiếm..." value="{{ request('search') }}">
                         </div>
                         <div class="col-md-2">
@@ -61,12 +108,8 @@
                                 @forelse($reviews as $review)
                                 <tr>
                                     <td>{{ $review->id }}</td>
-                                    <td>
-                                        <a href="{{ route('products.show', $review->product->slug) }}" target="_blank">
-                                            {{ Str::limit($review->product->title, 30) }}
-                                        </a>
-                                    </td>
-                                    <td>{{ $review->user->name }}</td>
+                                    <td>{{ Str::limit($review->product->title, 20) }}</td>
+                                    <td>{{ Str::limit($review->user->name, 20) }}</td>
                                     <td>
                                         <span class="text-warning">
                                             @for($i = 1; $i <= 5; $i++)
@@ -75,8 +118,8 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <strong>{{ $review->title }}</strong><br>
-                                        <small class="text-muted">{{ Str::limit($review->content, 50) }}</small>
+                                        <strong>{{ Str::limit($review->title, 20) }}</strong><br>
+                                        <small class="text-muted">{{ Str::limit($review->content, 40) }}</small>
                                     </td>
                                     <td>
                                         @if($review->status == 'approved')
@@ -99,7 +142,7 @@
                                                 </button>
                                             </form>
                                             @endif
-                                            
+
                                             @if($review->status != 'rejected')
                                             <form action="{{ route('admin.reviews.reject', $review) }}" method="POST" class="flex-fill">
                                                 @csrf
@@ -109,8 +152,8 @@
                                                 </button>
                                             </form>
                                             @endif
-                                            
-                                            <form action="{{ route('admin.reviews.destroy', $review) }}" method="POST" 
+
+                                            <form action="{{ route('admin.reviews.destroy', $review) }}" method="POST"
                                                   class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn xóa?')">
                                                 @csrf
                                                 @method('DELETE')
