@@ -13,6 +13,14 @@ class CouponController extends Controller
      */
     public function index(Request $request)
     {
+        $stats = [
+            'total'     => Coupon::count(),
+            'active'    => Coupon::where('starts_at', '<=', now())
+                ->where('ends_at', '>=', now())
+                ->count(),
+            'expired'   => Coupon::where('ends_at', '<', now())->count(),
+        ];
+
         $query = Coupon::query();
 
         // Tìm kiếm theo mã coupon
@@ -45,8 +53,8 @@ class CouponController extends Controller
         }
 
         $coupons = $query->paginate(20);
-        
-        return view('admin.coupons.index', compact('coupons'));
+
+        return view('admin.coupons.index', compact('coupons', 'stats'));
     }
 
     /**
