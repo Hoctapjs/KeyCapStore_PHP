@@ -15,18 +15,18 @@ class ReviewController extends Controller
     public function create($productId)
     {
         $product = Product::with(['productImages', 'brand'])->findOrFail($productId);
-        
-        // Check if user already reviewed this product
-        $existingReview = Review::where('product_id', $productId)
-            ->where('user_id', Auth::id())
-            ->first();
-            
-        if ($existingReview) {
-            return redirect()
-                ->route('products.show', $product->slug)
-                ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
-        }
-        
+
+        // // Check if user already reviewed this product
+        // $existingReview = Review::where('product_id', $productId)
+        //     ->where('user_id', Auth::id())
+        //     ->first();
+
+        // if ($existingReview) {
+        //     return redirect()
+        //         ->route('products.show', $product->slug)
+        //         ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
+        // }
+
         return view('products.review', compact('product'));
     }
 
@@ -50,17 +50,17 @@ class ReviewController extends Controller
         ]);
 
         $product = Product::findOrFail($productId);
-        
+
         // Check if user already reviewed
-        $existingReview = Review::where('product_id', $productId)
-            ->where('user_id', Auth::id())
-            ->first();
-            
-        if ($existingReview) {
-            return redirect()
-                ->route('products.show', $product->slug)
-                ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
-        }
+        // $existingReview = Review::where('product_id', $productId)
+        //     ->where('user_id', Auth::id())
+        //     ->first();
+
+        // if ($existingReview) {
+        //     return redirect()
+        //         ->route('products.show', $product->slug)
+        //         ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
+        // }
 
         Review::create([
             'product_id' => $productId,
@@ -93,7 +93,7 @@ class ReviewController extends Controller
         if ($review->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         return view('reviews.edit', compact('review'));
     }
 
@@ -106,7 +106,7 @@ class ReviewController extends Controller
         if ($review->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'title' => 'required|string|max:255',
@@ -124,7 +124,7 @@ class ReviewController extends Controller
             'status' => $newStatus,
         ]);
 
-        $message = $newStatus === 'pending' 
+        $message = $newStatus === 'pending'
             ? 'Đánh giá của bạn đã được cập nhật và đang chờ duyệt lại.'
             : 'Đánh giá của bạn đã được cập nhật!';
 
@@ -142,7 +142,7 @@ class ReviewController extends Controller
         if ($review->user_id !== Auth::id() && !Auth::user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $productSlug = $review->product->slug;
         $review->delete();
 

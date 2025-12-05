@@ -50,7 +50,7 @@
     .product-thumbnail-slider {
         position: relative;
         overflow: hidden;
-        
+
     }
 
     .thumbnail-container {
@@ -138,7 +138,7 @@
     .product-item .price {
         margin-top: auto;
     }
-    
+
     /* Wishlist button styles */
     .btn-wishlist {
         position: absolute;
@@ -175,6 +175,15 @@
     .btn-wishlist[data-in-wishlist="false"]:hover svg {
         fill: #dc3545;
         stroke: #dc3545;
+    }
+
+    .star {
+    color: #ddd;
+    font-size: 1.2rem;
+    }
+
+    .star.filled {
+        color: #ffc107;
     }
 </style>
 @endpush
@@ -215,7 +224,7 @@
                         <div class="thumbnail-container" id="thumbnailContainer">
                             @foreach($product->productImages as $index => $image)
                             <div class="thumbnail-item">
-                                <img src="{{ $image->image_url }}" 
+                                <img src="{{ $image->image_url }}"
                                      alt="{{ $image->alt }}"
                                      class="rounded {{ $index === 0 ? 'active' : '' }}"
                                      data-index="{{ $index }}"
@@ -299,19 +308,19 @@
                     $sizes = [];
                     $colorsBySize = [];
                     $colorsOnly = [];
-                    
+
                     foreach($product->variants as $variant) {
                         $options = is_array($variant->option_values) ? $variant->option_values : [];
                         $size = $options['size'] ?? null;
                         $color = $options['color'] ?? null;
-                        
+
                         // Get first variant image
                         $variantImage = $variant->images->first();
 
                         if($size && !in_array($size, $sizes)) {
                             $sizes[] = $size;
                         }
-                        
+
                         if($size && $color) {
                             if(!isset($colorsBySize[$size])) {
                                 $colorsBySize[$size] = [];
@@ -356,14 +365,14 @@
                             <div id="color-options" class="d-flex gap-2 flex-wrap">
                                 @if(count($colorsOnly) > 0)
                                     @foreach($colorsOnly as $colorData)
-                                    <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
+                                    <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}"
                                             data-variant-id="{{ $colorData['variant_id'] }}"
                                             data-price="{{ $colorData['price'] }}"
                                             data-stock="{{ $colorData['stock'] }}"
                                             data-image="{{ $colorData['image'] ?? '' }}"
                                             {{ $colorData['stock'] <= 0 ? 'disabled' : '' }}>
                                         @if($colorData['image'])
-                                        <img src="{{ $colorData['image'] }}" alt="{{ $colorData['color'] }}" 
+                                        <img src="{{ $colorData['image'] }}" alt="{{ $colorData['color'] }}"
                                              style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                         @endif
                                         <div class="text-start">
@@ -381,14 +390,14 @@
                             <h5 class="mb-3">Chọn màu sắc:</h5>
                             <div id="color-options" class="d-flex gap-2 flex-wrap">
                                 @foreach($colorsOnly as $colorData)
-                                <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}" 
+                                <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 {{ $colorData['stock'] <= 0 ? 'disabled opacity-50' : '' }}"
                                         data-variant-id="{{ $colorData['variant_id'] }}"
                                         data-price="{{ $colorData['price'] }}"
                                         data-stock="{{ $colorData['stock'] }}"
                                         data-image="{{ $colorData['image'] ?? '' }}"
                                         {{ $colorData['stock'] <= 0 ? 'disabled' : '' }}>
                                     @if($colorData['image'])
-                                    <img src="{{ $colorData['image'] }}" alt="{{ $colorData['color'] }}" 
+                                    <img src="{{ $colorData['image'] }}" alt="{{ $colorData['color'] }}"
                                          style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                     @endif
                                     <div class="text-start">
@@ -540,68 +549,65 @@
                 </div>
             </div>
 
-            <!-- Reviews -->
-            <div class="row mt-4">
+            <!-- Reviews Section -->
+            <div class="row mt-5">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h3 class="mb-0">Đánh giá sản phẩm</h3>
+                        <div class="card-body p-5">
+
+                            <!-- Header + Write Review Button -->
+                            <div class="d-flex justify-content-between align-items-center mb-5">
+                                <div>
+                                    <h3 class="fw-bold mb-1">Đánh giá sản phẩm ({{ $totalReviews }})</h3>
+                                    <p class="text-muted mb-0">Đánh giá từ khách hàng đã mua hàng</p>
+                                </div>
+
                                 @auth
-                                    @if($userReview)
-                                        <a href="{{ route('review.edit', ['product' => $product->id, 'review' => $userReview->id]) }}" class="btn btn-warning">
-                                            <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa đánh giá của bạn
-                                        </a>
-                                    @else
-                                        <a href="{{ route('review.create', $product->id) }}" class="btn btn-primary">
-                                            <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
-                                        </a>
-                                    @endif
+                                    <a href="{{ route('review.create', ['product' => $product->id]) }}" class="btn btn-primary btn-lg px-5">
+                                        <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
+                                    </a>
                                 @else
-                                    <a href="{{ route('login.form') }}" class="btn btn-outline-primary">
-                                        <i class="bi bi-pencil-square me-2"></i>Đăng nhập để đánh giá
+                                    <a href="{{ route('login.form') }}" class="btn btn-outline-primary btn-lg px-5">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập để đánh giá
                                     </a>
                                 @endauth
                             </div>
 
-                            <!-- Rating Summary + Filter -->
-                            <div class="row mb-4">
-                                <div class="col-lg-4 text-center text-lg-start mb-4 mb-lg-0">
-                                    <div class="bg-light rounded-3 p-4">
-                                            <!-- Avg Rating -->
-                                        <div class="d-flex align-items-baseline justify-content-center justify-content-lg-start mb-2">
-                                            <span class="display-3 fw-bold text-warning me-2">★ {{ number_format($avgRating, 1) }}</span>
-                                            <span class="fs-5 text-muted">/ 5</span>
+                            <!-- Rating Summary -->
+                            <div class="row align-items-center mb-5">
+                                <div class="col-lg-4 text-center text-lg-start">
+                                    <div class="bg-light rounded-4 p-4">
+                                        <div class="d-flex align-items-center justify-content-center justify-content-lg-start gap-3 mb-3">
+                                            <span class="display-2 fw-bold text-warning">★</span>
+                                            <div>
+                                                <h2 class="mb-0">{{ number_format($avgRating, 1) }}</h2>
+                                                <p class="text-muted mb-0">trên 5 sao</p>
+                                            </div>
                                         </div>
-
-                                        <!-- Stars -->
-                                        <div class="text-warning fs-3 mb-2">
+                                        <div class="text-warning fs-4">
                                             @for($i = 1; $i <= 5; $i++)
                                                 <i class="bi {{ $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }}"></i>
                                             @endfor
                                         </div>
-
-                                        <!-- Total reviews -->
-                                        <div class="text-muted">{{ $totalReviews }} đánh giá</div>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-8">
-                                    <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex flex-column gap-3">
                                         @for($i = 5; $i >= 1; $i--)
                                             <div class="d-flex align-items-center gap-3">
-                                                <div class="text-warning" style="width: 100px;">
-                                                    {{ $i }} <i class="bi bi-star-fill"></i>
+                                                <div class="text-warning text-end" style="width: 80px;">
+                                                    {{ $i}} <i class="bi bi-star-fill"></i>
                                                 </div>
-                                                <div class="progress flex-grow-1" style="height: 10px;">
+                                                <div class="progress flex-grow-1" style="height: 12px;">
                                                     @php
-                                                        $barWidth = $totalReviews > 0
-                                                            ? round(($ratingStats[$i] / $totalReviews) * 100, 2)
-                                                            : 0;
+                                                        $percent = $totalReviews > 0 ? round(($ratingStats[$i] / $totalReviews) * 100) : 0;
                                                     @endphp
-                                                    <div class="progress-bar" style="width: {{ $barWidth }}%; background-color: #f0ad4e;"></div>
+                                                    <div class="progress-bar bg-primary" style="width: {{ $percent }}%"></div>
                                                 </div>
-                                                <div class="text-muted text-end" style="width: 50px;">{{ $ratingStats[$i] }}</div>
+                                                <div class="text-muted text-end fw-semibold" style="width: 60px;">
+                                                    {{ $ratingStats[$i] }}
+                                                </div>
                                             </div>
                                         @endfor
                                     </div>
@@ -609,50 +615,91 @@
                                     <!-- Filter by star -->
                                     <div class="mt-4 d-flex flex-wrap gap-2">
                                         <a href="{{ route('products.show', $product->slug) }}"
-                                        class="btn {{ !request('rating') || request('rating') == 'all' ? 'btn-warning' : 'btn-outline-warning' }} btn-sm px-3">
+                                        class="btn {{ !request('rating') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
                                             Tất cả ({{ $totalReviews }})
                                         </a>
                                         @for($i = 5; $i >= 1; $i--)
                                             <a href="{{ route('products.show', $product->slug) . '?rating=' . $i }}"
-                                            class="btn {{ request('rating') == $i ? 'btn-warning' : 'btn-outline-warning' }} btn-sm px-3">
-                                                {{ $i }} Star ({{ $ratingStats[$i] }})
+                                            class="btn {{ request('rating') == $i ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
+                                                {{ $i }} sao ({{ $ratingStats[$i] }})
                                             </a>
                                         @endfor
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Reviews List with Pagination -->
-                            <div class="reviews-list">
+                            <!-- Reviews List -->
+                            <div class="reviews-list mt-5">
                                 @forelse($reviews as $review)
-                                    <div class="border-bottom pb-4 mb-4">
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <div>
-                                                <strong>{{ $review->user->name }}</strong>
-                                                <div class="text-warning d-inline-block ms-2">
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        {{ $i <= $review->rating ? '★' : '☆' }}
-                                                    @endfor
+                                    <div class="card border-0 shadow-sm mb-4 hover-lift">
+                                        <div class="card-body p-4">
+                                            <div class="row">
+                                                <!-- LEFT COLUMN: User + Time -->
+                                                <div class="col-lg-3 text-center text-lg-start mb-4 mb-lg-0">
+                                                    <div class="d-flex flex-column align-items-center align-items-lg-start">
+                                                        {{-- <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                                            <i class="bi bi-person-circle fs-1 text-muted"></i>
+                                                        </div> --}}
+                                                        <strong class="fs-5 text-dark">{{ $review->user->name }}</strong>
+                                                        <small class="text-muted">
+                                                            {{ $review->created_at->format('d/m/Y') }}<br>
+                                                            <span class="text-primary fw-semibold">{{ $review->created_at->format('H:i') }}</span>
+                                                        </small>
+                                                    </div>
+                                                </div>
+
+                                                <!-- RIGHT COLUMN: Star + Title + Content -->
+                                                <div class="col-lg-9">
+                                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                                        <div>
+                                                            <!-- Star -->
+                                                            <div class="star-rating-display mb-2">
+                                                                @for($i = 1; $i <= 5; $i++)
+                                                                    <span class="star {{ $i <= $review->rating ? 'filled' : '' }}">★</span>
+                                                                @endfor
+                                                            </div>
+
+                                                            <!-- Title -->
+                                                            @if($review->title)
+                                                                <h6 class="fw-bold text-primary mb-2">{{ $review->title }}</h6>
+                                                            @endif
+
+                                                            <!-- Content -->
+                                                            <p class="text-dark lh-lg mb-0">{{ $review->content }}</p>
+                                                        </div>
+
+                                                        <!-- The Edit button is only visible to the owner -->
+                                                        @auth
+                                                            @if(auth()->id() === $review->user_id)
+                                                                <a href="{{ route('review.edit', ['product' => $product->id, 'review' => $review->id]) }}"
+                                                                class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                                                                title="Chỉnh sửa đánh giá">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                    <span class="d-none d-md-inline">Sửa</span>
+                                                                </a>
+                                                            @endif
+                                                        @endauth
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <small class="text-muted">{{ $review->created_at->format('d/m/Y') }}</small>
                                         </div>
-                                        @if($review->title)
-                                            <h6 class="fw-bold text-primary mb-1">{{ $review->title }}</h6>
-                                        @endif
-                                        <p class="mb-0 text-dark">{{ $review->content }}</p>
                                     </div>
                                 @empty
-                                    <div class="text-center py-5 text-muted">
-                                        <i class="bi bi-chat-square-text fs-1 d-block mb-3"></i>
-                                        <p class="fs-5">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                    <div class="text-center py-5">
+                                        <i class="bi bi-chat-square-text fs-1 text-muted d-block mb-4"></i>
+                                        <p class="fs-4 text-muted mb-3">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                        @auth
+                                            <a href="{{ route('review.create', $product) }}" class="btn btn-primary btn-lg">
+                                                <i class="bi bi-pencil-square me-2"></i>Viết đánh giá đầu tiên
+                                            </a>
+                                        @endauth
                                     </div>
                                 @endforelse
                             </div>
 
-                            <!-- Pagination - chỉ hiện nếu có nhiều hơn 1 trang -->
+                            <!-- Pagination -->
                             @if($reviews->hasPages())
-                                <div class="mt-4">
+                                <div class="mt-5 text-center">
                                     {{ $reviews->withQueryString()->links('vendor.pagination.bootstrap-5') }}
                                 </div>
                             @endif
@@ -673,8 +720,8 @@
                                     @php
                                         $isInWishlist = auth()->check() && auth()->user()->wishlistProducts->contains($related->id);
                                     @endphp
-                                    <a href="javascript:void(0)" 
-                                       class="btn-wishlist wishlist-toggle" 
+                                    <a href="javascript:void(0)"
+                                       class="btn-wishlist wishlist-toggle"
                                        data-product-id="{{ $related->id }}"
                                        data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
                                        title="{{ $isInWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích' }}">
@@ -715,24 +762,24 @@
     $(document).ready(function() {
         console.log('jQuery loaded:', typeof jQuery !== 'undefined');
         console.log('Wishlist buttons found:', $('.wishlist-toggle').length);
-        
+
         // Wishlist toggle functionality - MUST be before product-item click
         $(document).on('click', '.wishlist-toggle', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const $btn = $(this);
             const productId = $btn.data('product-id');
             const isInWishlist = $btn.data('in-wishlist') === 'true' || $btn.data('in-wishlist') === true;
-            
+
             console.log('jQuery Wishlist toggle clicked:', productId, 'Current state:', isInWishlist);
-            
+
             @guest
                 alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích');
                 window.location.href = '{{ route("login.form") }}';
                 return;
             @endguest
-            
+
             $.ajax({
                 url: `/wishlist/toggle/${productId}`,
                 type: 'POST',
@@ -745,10 +792,10 @@
                         // Update button state
                         $btn.data('in-wishlist', response.in_wishlist);
                         $btn.attr('data-in-wishlist', response.in_wishlist);
-                        
+
                         // Update tooltip
                         $btn.attr('title', response.in_wishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích');
-                        
+
                         // Update wishlist count in header
                         if (response.count > 0) {
                             if ($('.wishlist-count').length === 0) {
@@ -772,7 +819,7 @@
                 }
             });
         });
-        
+
         // Handle product card click for related products (exclude wishlist button)
         $('.product-item').on('click', function(e) {
             // Don't navigate if clicking on wishlist button
@@ -784,7 +831,7 @@
                 window.location.href = url;
             }
         });
-        
+
         // Load variants data
         const variantsData = JSON.parse($('#variants-data').text() || '{}');
         const colorsOnlyData = JSON.parse($('#colors-only-data').text() || '[]');
@@ -862,11 +909,11 @@
 
             colors.forEach(function(colorData) {
                 const disabled = colorData.stock <= 0 ? 'disabled opacity-50' : '';
-                const imageHtml = colorData.image 
+                const imageHtml = colorData.image
                     ? `<img src="${colorData.image}" alt="${colorData.color}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">`
                     : '';
                 colorHtml += `
-                    <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 ${disabled}" 
+                    <button type="button" class="btn btn-outline-secondary color-option d-flex align-items-center gap-2 ${disabled}"
                             data-variant-id="${colorData.variant_id}"
                             data-price="${colorData.price}"
                             data-stock="${colorData.stock}"
@@ -915,7 +962,7 @@
 
     function changeMainImage(imageUrl, index) {
         document.getElementById('mainProductImage').src = imageUrl;
-        
+
         // Update active state
         document.querySelectorAll('.thumbnail-item img').forEach(img => {
             img.classList.remove('active');
@@ -926,15 +973,15 @@
     function scrollThumbnails(direction) {
         const container = document.getElementById('thumbnailContainer');
         const maxScroll = container.scrollWidth - container.parentElement.offsetWidth;
-        
+
         currentScrollPosition += direction * scrollAmount;
-        
+
         // Limit scroll position
         if (currentScrollPosition < 0) currentScrollPosition = 0;
         if (currentScrollPosition > maxScroll) currentScrollPosition = maxScroll;
-        
+
         container.style.transform = `translateX(-${currentScrollPosition}px)`;
-        
+
         // Update button states
         updateNavButtons(maxScroll);
     }
@@ -942,7 +989,7 @@
     function updateNavButtons(maxScroll) {
         const prevBtn = document.getElementById('thumbPrev');
         const nextBtn = document.getElementById('thumbNext');
-        
+
         if (prevBtn && nextBtn) {
             prevBtn.disabled = currentScrollPosition <= 0;
             nextBtn.disabled = currentScrollPosition >= maxScroll;

@@ -16,47 +16,47 @@ class ProductController extends Controller
             ->select('id', 'title', 'slug', 'code', 'brand_id', 'price', 'stock', 'status', 'created_at')
             ->with([
                 'brand:id,name,slug',
-                'productImages' => function($query) {
+                'productImages' => function ($query) {
                     $query->select('id', 'product_id', 'image_url', 'alt')
                         ->orderBy('sort_order')
                         ->limit(1);
                 },
                 'variants:id,product_id,price,stock_quantity'
             ])
-            ->withAvg(['reviews as reviews_avg_rating' => function($query) {
+            ->withAvg(['reviews as reviews_avg_rating' => function ($query) {
                 $query->where('status', 'approved');
             }], 'rating')
             ->where('status', 'active');
 
         // Filter by category
         if ($request->filled('category')) {
-            $query->whereHas('categories', function($q) use ($request) {
+            $query->whereHas('categories', function ($q) use ($request) {
                 $q->where('slug', $request->category);
             });
         }
 
         // Filter by brand
         if ($request->has('brand')) {
-            $query->whereHas('brand', function($q) use ($request) {
+            $query->whereHas('brand', function ($q) use ($request) {
                 $q->where('slug', $request->brand);
             });
         }
 
         // Filter by tag
         if ($request->has('tag')) {
-            $query->whereHas('tags', function($q) use ($request) {
+            $query->whereHas('tags', function ($q) use ($request) {
                 $q->where('slug', $request->tag);
             });
         }
 
         // Filter by price range (using variants price)
         if ($request->filled('min_price') && is_numeric($request->min_price)) {
-            $query->whereHas('variants', function($q) use ($request) {
+            $query->whereHas('variants', function ($q) use ($request) {
                 $q->where('price', '>=', $request->min_price);
             });
         }
         if ($request->filled('max_price') && is_numeric($request->max_price)) {
-            $query->whereHas('variants', function($q) use ($request) {
+            $query->whereHas('variants', function ($q) use ($request) {
                 $q->where('price', '<=', $request->max_price);
             });
         }
@@ -70,10 +70,10 @@ class ProductController extends Controller
         // Search
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
@@ -83,12 +83,12 @@ class ProductController extends Controller
             case 'price_asc':
                 // Sort by minimum variant price ascending
                 $query->withMin('variants', 'price')
-                      ->orderBy('variants_min_price', 'asc');
+                    ->orderBy('variants_min_price', 'asc');
                 break;
             case 'price_desc':
                 // Sort by minimum variant price descending
                 $query->withMin('variants', 'price')
-                      ->orderBy('variants_min_price', 'desc');
+                    ->orderBy('variants_min_price', 'desc');
                 break;
             case 'name_asc':
                 $query->orderBy('title', 'asc');
@@ -111,26 +111,26 @@ class ProductController extends Controller
             ->groupBy('brands.id', 'brands.name', 'brands.slug')
             ->orderBy('brands.name')
             ->get();
-        
+
         $categories = Category::select('id', 'name', 'slug', 'parent_id')
             ->whereNull('parent_id')
-            ->whereHas('products', function($query) {
+            ->whereHas('products', function ($query) {
                 $query->where('status', 'active');
             })
-            ->orWhereHas('children', function($query) {
-                $query->whereHas('products', function($q) {
+            ->orWhereHas('children', function ($query) {
+                $query->whereHas('products', function ($q) {
                     $q->where('status', 'active');
                 });
             })
-            ->with(['children' => function($query) {
+            ->with(['children' => function ($query) {
                 $query->select('id', 'name', 'slug', 'parent_id')
-                    ->whereHas('products', function($q) {
+                    ->whereHas('products', function ($q) {
                         $q->where('status', 'active');
                     });
             }])
             ->get();
-        
-        $tags = cache()->remember('filter_tags', 3600, function() {
+
+        $tags = cache()->remember('filter_tags', 3600, function () {
             return ProductTag::select('id', 'name', 'slug')->get();
         });
 
@@ -145,7 +145,7 @@ class ProductController extends Controller
                 'categories:id,name,slug',
                 'tags:id,name,slug',
                 'variants.images',
-                'productImages' => function($query) {
+                'productImages' => function ($query) {
                     $query->select('id', 'product_id', 'variant_id', 'image_url', 'alt', 'sort_order')
                         ->orderBy('sort_order');
                 }
@@ -157,13 +157,13 @@ class ProductController extends Controller
         $relatedProducts = Product::select('id', 'title', 'slug', 'price', 'stock', 'brand_id')
             ->with([
                 'brand:id,name',
-                'productImages' => function($query) {
+                'productImages' => function ($query) {
                     $query->select('id', 'product_id', 'image_url')->orderBy('sort_order')->limit(1);
                 },
                 'variants:id,product_id,price,stock_quantity'
             ])
             ->active()
-            ->whereHas('categories', function($q) use ($product) {
+            ->whereHas('categories', function ($q) use ($product) {
                 $q->whereIn('categories.id', $product->categories->pluck('id'));
             })
             ->where('id', '!=', $product->id)
@@ -175,7 +175,7 @@ class ProductController extends Controller
         $allReviews = $product->reviews()->where('status', 'approved')->get();
         $avgRating = $allReviews->avg('rating') ?? 0;
         $totalReviews = $allReviews->count();
-        
+
         // Rating statistics (count for each star)
         $ratingStats = [];
         for ($i = 1; $i <= 5; $i++) {
@@ -186,13 +186,13 @@ class ProductController extends Controller
         $reviewsQuery = $product->reviews()
             ->with('user:id,name')
             ->where('status', 'approved');
-        
+
         // Filter by rating if provided
         if (request('rating') && request('rating') != 'all') {
             $reviewsQuery->where('rating', request('rating'));
         }
-        
-        $reviews = $reviewsQuery->latest()->paginate(10);
+
+        $reviews = $reviewsQuery->latest()->paginate(5);
 
         // Check if current user has reviewed this product
         $userReview = null;
@@ -203,9 +203,9 @@ class ProductController extends Controller
         }
 
         return view('products.show', compact(
-            'product', 
-            'relatedProducts', 
-            'avgRating', 
+            'product',
+            'relatedProducts',
+            'avgRating',
             'totalReviews',
             'ratingStats',
             'reviews',
