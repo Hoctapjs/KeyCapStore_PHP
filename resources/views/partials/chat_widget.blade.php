@@ -243,26 +243,65 @@
         box-shadow: 0 0 5px #47cf73;
     }
 
-    /* Mobile */
-    @media screen and (max-width: 450px) {
+    /* Mobile - Chatbot nhỏ gọn */
+    @media screen and (max-width: 768px) {
         .chat-box {
-            width: 100% !important;
-            right: 0;
-            bottom: 0;
-            height: 100%;
-            border-radius: 0;
-            max-height: 100%;
-            bottom: 0 !important;
+            width: 92% !important;
+            max-width: 360px !important;
+            right: 4% !important;
+            left: auto !important;
+            bottom: 70px !important;
+            top: auto !important;
+            height: 65vh !important;
+            max-height: 450px !important;
+            border-radius: 16px !important;
         }
 
         .chat-box-header {
-            padding-top: 40px;
+            padding: 12px 16px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        
+        .chat-box-header h3 {
+            font-size: 0.95rem;
+        }
+
+        .chat-box-body {
+            padding: 12px;
+        }
+
+        .chat-box-footer {
+            padding: 10px 12px;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+        
+        .chat-box-footer input {
+            font-size: 16px;
+            padding: 10px 12px;
         }
 
         .chat-button {
+            bottom: 15px;
+            right: 15px;
+            padding: 10px 18px;
+        }
+    }
+    
+    @media screen and (max-width: 450px) {
+        .chat-box {
+            width: 94% !important;
+            right: 3% !important;
+            height: 60vh !important;
+            max-height: 400px !important;
+        }
+        
+        .chat-button {
             bottom: 10px;
             right: 10px;
-            padding: 10px 20px;
+            padding: 8px 16px;
+            font-size: 14px;
         }
     }
 </style>

@@ -417,7 +417,101 @@
         });
     </script>
 
-
+    <!-- Mobile Search Suggestions Script -->
+    <script>
+        $(document).ready(function() {
+            var mobileSearchTimeout;
+            
+            // Use event delegation for dynamically loaded content
+            $(document).on('input', '#mobile-search-input', function() {
+                var $mobileInput = $(this);
+                var $mobileSuggestions = $('#mobile-search-suggestions');
+                var query = $mobileInput.val().trim();
+                
+                clearTimeout(mobileSearchTimeout);
+                
+                if (query.length < 2) {
+                    $mobileSuggestions.hide();
+                    return;
+                }
+                
+                // Show loading
+                $mobileSuggestions.html('<div class="mobile-search-loading"><i class="fas fa-spinner fa-spin"></i> Đang tìm...</div>').show();
+                
+                mobileSearchTimeout = setTimeout(function() {
+                    $.ajax({
+                        url: '{{ route("search.suggestions") }}',
+                        data: { q: query },
+                        dataType: 'json',
+                        success: function(data) {
+                            var html = '';
+                            
+                            // Categories
+                            if (data.categories && data.categories.length > 0) {
+                                html += '<div class="mobile-suggestions-section">';
+                                html += '<div class="mobile-suggestions-title">Danh mục</div>';
+                                html += '<div class="mobile-suggestions-list">';
+                                data.categories.forEach(function(cat) {
+                                    html += '<a href="{{ url("products") }}?category=' + cat.slug + '"><i class="fas fa-folder"></i> ' + cat.name + '</a>';
+                                });
+                                html += '</div></div>';
+                            }
+                            
+                            // Brands
+                            if (data.brands && data.brands.length > 0) {
+                                html += '<div class="mobile-suggestions-section">';
+                                html += '<div class="mobile-suggestions-title">Thương hiệu</div>';
+                                html += '<div class="mobile-suggestions-list">';
+                                data.brands.forEach(function(brand) {
+                                    html += '<a href="{{ url("products") }}?brand=' + brand.slug + '"><i class="fas fa-tag"></i> ' + brand.name + '</a>';
+                                });
+                                html += '</div></div>';
+                            }
+                            
+                            // Products
+                            if (data.products && data.products.length > 0) {
+                                html += '<div class="mobile-suggestions-section">';
+                                html += '<div class="mobile-suggestions-title">Sản phẩm</div>';
+                                data.products.forEach(function(product) {
+                                    var imageUrl = product.image || '{{ asset("images/placeholder.svg") }}';
+                                    html += '<a href="{{ url("products") }}/' + product.slug + '" class="mobile-suggestion-product">';
+                                    html += '<img src="' + imageUrl + '" alt="' + product.title + '" onerror="this.src=\'{{ asset("images/placeholder.svg") }}\'">';
+                                    html += '<div class="mobile-suggestion-product-info">';
+                                    html += '<div class="name">' + product.title + '</div>';
+                                    html += '<div class="price">' + product.price + '</div>';
+                                    html += '</div></a>';
+                                });
+                                html += '</div>';
+                            }
+                            
+                            if (!html) {
+                                html = '<div class="mobile-search-loading">Không tìm thấy kết quả</div>';
+                            }
+                            
+                            $mobileSuggestions.html(html).show();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Mobile search error:', error);
+                            $mobileSuggestions.html('<div class="mobile-search-loading">Lỗi tìm kiếm</div>').show();
+                        }
+                    });
+                }, 300);
+            });
+            
+            // Hide when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#mobile-search-input, #mobile-search-suggestions').length) {
+                    $('#mobile-search-suggestions').hide();
+                }
+            });
+            
+            // Clear suggestions when offcanvas is hidden
+            $(document).on('hidden.bs.offcanvas', '#offcanvasSearch', function() {
+                $('#mobile-search-suggestions').hide();
+                $('#mobile-search-input').val('');
+            });
+        });
+    </script>
 
     @stack('scripts')
 </body>
