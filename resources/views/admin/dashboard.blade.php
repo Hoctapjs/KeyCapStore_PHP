@@ -4,165 +4,167 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="container-fluid py-5">
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-1">Chào mừng trở lại! 👋</h2>
-        <p class="text-muted">Tổng quan hệ thống quản lý</p>
-    </div>
-</div>    <!-- Statistics Cards -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-2">Tổng sản phẩm</h6>
-                            <h2 class="mb-0">{{ $totalProducts }}</h2>
-                        </div>
-                        <div class="text-primary">
-                            <svg width="48" height="48" fill="currentColor">
-                                <use xlink:href="#box"></use>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid py-4">
 
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-2">Danh mục</h6>
-                            <h2 class="mb-0">{{ $totalCategories }}</h2>
-                        </div>
-                        <div class="text-success">
-                            <svg width="48" height="48" fill="currentColor">
-                                <use xlink:href="#folder"></use>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-2">Thương hiệu</h6>
-                            <h2 class="mb-0">{{ $totalBrands }}</h2>
-                        </div>
-                        <div class="text-warning">
-                            <svg width="48" height="48" fill="currentColor">
-                                <use xlink:href="#tag"></use>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm border-danger">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-2">Sắp hết hàng</h6>
-                            <h2 class="mb-0 text-danger">{{ $lowStockProducts }}</h2>
-                        </div>
-                        <div class="text-danger">
-                            <svg width="48" height="48" fill="currentColor">
-                                <use xlink:href="#exclamation-triangle"></use>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="row mb-4">
+    <!-- Welcome Section -->
+    <div class="row mb-5">
         <div class="col-12">
-            <h3 class="mb-4">Quản lý nhanh</h3>
+            <h1 class="display-6 fw-bold mb-2">
+                Chào mừng trở lại! 👋
+            </h1>
+            <p class="text-muted fs-5">Tổng quan hệ thống quản trị</p>
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Total Products -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam fs-1 mb-3"></i>
+                    <h4 class="mb-1 fw-bold">{{ number_format($totalProducts) }}</h4>
+                    <small class="opacity-90">Tổng sản phẩm</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Categories -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-folder2-open fs-1 mb-3"></i>
+                    <h4 class="mb-1 fw-bold">{{ $totalCategories }}</h4>
+                    <small class="opacity-90">Danh mục</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Brands -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-tags fs-1 mb-3"></i>
+                    <h4 class="mb-1 fw-bold">{{ $totalBrands }}</h4>
+                    <small class="opacity-90">Thương hiệu</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle fs-1 mb-3"></i>
+                    <h4 class="mb-1 fw-bold">{{ $lowStockProducts }}</h4>
+                    <small class="opacity-90">Sắp hết hàng</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <h4 class="mb-4 fw-bold text-dark">Quản lý nhanh</h4>
     <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+
+        <!-- Products -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <svg width="24" height="24" fill="currentColor" class="me-2">
-                            <use xlink:href="#box"></use>
-                        </svg>
-                        Quản lý sản phẩm
-                    </h5>
-                    <p class="card-text text-muted">Thêm, sửa, xóa sản phẩm và quản lý variants</p>
-                    <div class="d-flex gap-2 mt-3">
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-primary">Danh sách</a>
-                        <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Thêm mới</a>
+                    <i class="bi bi-box-seam text-primary fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Sản phẩm</h5>
+                    <p class="text-muted small mb-3">Quản lý sản phẩm & biến thể</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-primary btn-sm">Danh sách</a>
+                        <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">Thêm mới</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+        <!-- Orders -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <svg width="24" height="24" fill="currentColor" class="me-2">
-                            <use xlink:href="#folder"></use>
-                        </svg>
-                        Quản lý danh mục
-                    </h5>
-                    <p class="card-text text-muted">Tổ chức danh mục sản phẩm theo cấp bậc</p>
-                    <div class="d-flex gap-2 mt-3">
-                        <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-success">Danh sách</a>
-                        <a href="{{ route('admin.categories.create') }}" class="btn btn-success">Thêm mới</a>
+                    <i class="bi bi-truck text-success fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Đơn hàng</h5>
+                    <p class="text-muted small mb-3">Xử lý & theo dõi đơn hàng</p>
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-success btn-sm w-100">Quản lý đơn</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coupons -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <i class="bi bi-ticket-perforated text-warning fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Mã giảm giá</h5>
+                    <p class="text-muted small mb-3">Tạo & quản lý khuyến mãi</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('admin.coupons.index') }}" class="btn btn-outline-warning btn-sm">Danh sách</a>
+                        <a href="{{ route('admin.coupons.create') }}" class="btn btn-warning btn-sm">Tạo mới</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+        <!-- Reviews -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <svg width="24" height="24" fill="currentColor" class="me-2">
-                            <use xlink:href="#tag"></use>
-                        </svg>
-                        Quản lý thương hiệu
-                    </h5>
-                    <p class="card-text text-muted">Quản lý các thương hiệu sản phẩm</p>
-                    <div class="d-flex gap-2 mt-3">
-                        <a href="{{ route('admin.brands.index') }}" class="btn btn-outline-warning">Danh sách</a>
-                        <a href="{{ route('admin.brands.create') }}" class="btn btn-warning">Thêm mới</a>
-                    </div>
+                    <i class="bi bi-chat-square-text text-info fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Đánh giá</h5>
+                    <p class="text-muted small mb-3">Duyệt đánh giá khách hàng</p>
+                    <a href="{{ route('admin.reviews.index') }}" class="btn btn-info btn-sm w-100 text-white">Quản lý đánh giá</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+        <!-- Categories -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <svg width="24" height="24" fill="currentColor" class="me-2">
-                            <use xlink:href="#clipboard-check"></use>
-                        </svg>
-                        Quản lý tồn kho
-                    </h5>
-                    <p class="card-text text-muted">Theo dõi và cập nhật số lượng tồn kho</p>
-                    <div class="d-flex gap-2 mt-3">
-                        <a href="{{ route('admin.inventory.index') }}" class="btn btn-outline-info">Xem tồn kho</a>
-                    </div>
+                    <i class="bi bi-folder2-open text-success fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Danh mục</h5>
+                    <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-success btn-sm w-100">Quản lý</a>
                 </div>
             </div>
         </div>
+
+        <!-- Brands -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <i class="bi bi-tags text-warning fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Thương hiệu</h5>
+                    <a href="{{ route('admin.brands.index') }}" class="btn btn-outline-warning btn-sm w-100">Quản lý</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <i class="bi bi-hash text-secondary fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Tags</h5>
+                    <a href="{{ route('admin.tags.index') }}" class="btn btn-outline-secondary btn-sm w-100">Quản lý</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <i class="bi bi-inboxes text-danger fs-1 mb-3"></i>
+                    <h5 class="card-title mb-2">Tồn kho</h5>
+                    <a href="{{ route('admin.inventory.index') }}" class="btn btn-danger btn-sm w-100">Xem tồn kho</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 @endsection
