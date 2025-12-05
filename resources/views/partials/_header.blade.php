@@ -41,7 +41,7 @@
                             <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
                         </svg>
                     </div>
-                    
+
                     <!-- Search Suggestions Dropdown -->
                     <div id="search-suggestions" class="search-suggestions-dropdown" style="display: none;">
                         <div class="suggestions-content">
@@ -50,19 +50,19 @@
                                 <div class="suggestions-title">Danh mục</div>
                                 <div class="suggestions-list" id="categories-list"></div>
                             </div>
-                            
+
                             <!-- Brands Section -->
                             <div id="suggestions-brands" class="suggestions-section" style="display: none;">
                                 <div class="suggestions-title">Thương hiệu</div>
                                 <div class="suggestions-list" id="brands-list"></div>
                             </div>
-                            
+
                             <!-- Products Section -->
                             <div id="suggestions-products" class="suggestions-section" style="display: none;">
                                 <div class="suggestions-title">Sản phẩm gợi ý</div>
                                 <div class="suggestions-products-list" id="products-list"></div>
                             </div>
-                            
+
                             <!-- No Results -->
                             <div id="no-suggestions" class="text-center py-3 text-muted" style="display: none;">
                                 Không tìm thấy kết quả
@@ -347,9 +347,9 @@
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Switches</a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="/switches-linear" class="dropdown-item">Linear</a></li>
-                                        <li><a href="/switches-tactile" class="dropdown-item">Tactile</a></li>
-                                        <li><a href="/switches-clicky" class="dropdown-item">Clicky</a></li>
+                                        <li><a href="/products?category=linear-switches" class="dropdown-item">Linear</a></li>
+                                        <li><a href="/products?category=tactile-switches" class="dropdown-item">Tactile</a></li>
+                                        <li><a href="/products?category=clicky-switches" class="dropdown-item">Clicky</a></li>
                                     </ul>
                                 </li>
 

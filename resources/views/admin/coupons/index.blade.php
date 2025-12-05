@@ -104,7 +104,7 @@
                     <tbody>
                         @forelse($coupons as $coupon)
                             <tr>
-                                <td class="text-muted">#{{ $coupon->id }}</td>
+                                <td class="text-muted">{{ $coupon->id }}</td>
                                 <td><strong class="text-primary">{{ $coupon->code }}</strong></td>
                                 <td>
                                     <span class="badge {{ $coupon->type == 'percent' ? 'bg-warning' : 'bg-info' }}">
