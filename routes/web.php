@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
@@ -97,6 +98,15 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/account/password', [AccountController::class, 'updatePassword'])
         ->name('account.updatePassword');
+
+    Route::get('/account/orders', [AccountController::class, 'orders'])
+        ->name('account.orders');
+
+    Route::get('/account/orders/{id}', [AccountController::class, 'orderDetail'])
+        ->name('account.order.detail');
+
+    Route::post('/account/orders/{id}/cancel', [AccountController::class, 'cancelOrder'])
+        ->name('account.order.cancel');
 });
 
 // ============ MODULE 2: CATALOG (PRODUCTS) ============
@@ -112,14 +122,7 @@ Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('cat
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,staff'])->group(function () {
 
     // Dashboard - both admin and staff
-    Route::get('/dashboard', function () {
-        $totalProducts = \App\Models\Product::count();
-        $totalCategories = \App\Models\Category::count();
-        $totalBrands = \App\Models\Brand::count();
-        $lowStockProducts = \App\Models\Product::where('stock', '<', 10)->count();
-
-        return view('admin.dashboard', compact('totalProducts', 'totalCategories', 'totalBrands', 'lowStockProducts'));
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Products - both admin and staff
     Route::resource('products', AdminProductController::class);
@@ -204,8 +207,10 @@ Route::get('/wishlist/count', [WishlistController::class, 'count'])->name('wishl
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 });
+
+// Checkout success - không cần auth vì VNPay redirect về
+Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 
 // Payment
 Route::get('/payment/vnpay/return', [CheckoutController::class, 'vnpayReturn'])

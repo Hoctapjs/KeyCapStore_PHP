@@ -16,16 +16,16 @@ class ReviewController extends Controller
     {
         $product = Product::with(['productImages', 'brand'])->findOrFail($productId);
 
-        // // Check if user already reviewed this product
-        // $existingReview = Review::where('product_id', $productId)
-        //     ->where('user_id', Auth::id())
-        //     ->first();
+        // Check if user already reviewed this product
+        $existingReview = Review::where('product_id', $productId)
+            ->where('user_id', Auth::id())
+            ->first();
 
-        // if ($existingReview) {
-        //     return redirect()
-        //         ->route('products.show', $product->slug)
-        //         ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
-        // }
+        if ($existingReview) {
+            return redirect()
+                ->route('products.show', $product->slug)
+                ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
+        }
 
         return view('products.review', compact('product'));
     }
@@ -52,15 +52,15 @@ class ReviewController extends Controller
         $product = Product::findOrFail($productId);
 
         // Check if user already reviewed
-        // $existingReview = Review::where('product_id', $productId)
-        //     ->where('user_id', Auth::id())
-        //     ->first();
+        $existingReview = Review::where('product_id', $productId)
+            ->where('user_id', Auth::id())
+            ->first();
 
-        // if ($existingReview) {
-        //     return redirect()
-        //         ->route('products.show', $product->slug)
-        //         ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
-        // }
+        if ($existingReview) {
+            return redirect()
+                ->route('products.show', $product->slug)
+                ->with('error', 'Bạn đã đánh giá sản phẩm này rồi.');
+        }
 
         Review::create([
             'product_id' => $productId,

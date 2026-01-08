@@ -31,6 +31,31 @@ class Product extends Model
         'price' => 'decimal:2',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Khi xóa sản phẩm
+        static::deleting(function ($product) {
+            // Xóa tất cả file ảnh vật lý
+            if ($product->images && is_array($product->images)) {
+                foreach ($product->images as $image) {
+                    $imagePath = public_path($image);
+                    if (file_exists($imagePath)) {
+                        @unlink($imagePath);
+                    }
+                }
+            }
+
+            // ProductImages, ProductVariants, Reviews, Tags, Categories 
+            // đã có cascade delete trong migration
+            
+            // CartItems sẽ được xóa cascade sau khi chạy migration mới
+            
+            // OrderItems sẽ set product_id = null để giữ lịch sử
+        });
+    }
+
     // Relationships
     public function brand()
     {
@@ -200,5 +225,18 @@ class Product extends Model
             'archived' => 'bg-secondary',
             default => 'bg-danger',
         };
+    }
+
+    /**
+     * Lấy URL hình ảnh đầu tiên
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->images && is_array($this->images) && count($this->images) > 0) {
+            return $this->images[0];
+        }
+        
+        // Trả về hình mặc định nếu không có
+        return asset('images/no-image.png');
     }
 }

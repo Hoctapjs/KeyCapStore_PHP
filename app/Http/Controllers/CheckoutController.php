@@ -42,7 +42,15 @@ class CheckoutController extends Controller
 
         $subtotal = $cart->items->sum(fn($i) => $i->price_snapshot * $i->quantity);
 
-        return view('checkout.index', compact('cart', 'subtotal'));
+        // Lấy danh sách địa chỉ của user
+        $addresses = Auth::check() 
+            ? Auth::user()->addresses()->orderByDesc('is_default')->get() 
+            : collect();
+
+        // Lấy địa chỉ mặc định
+        $defaultAddress = $addresses->firstWhere('is_default', true);
+
+        return view('checkout.index', compact('cart', 'subtotal', 'addresses', 'defaultAddress'));
     }
 
     public function placeOrder(Request $request)
@@ -201,6 +209,7 @@ class CheckoutController extends Controller
                         'product_id' => $item->product_id,
                         'variant_id' => $item->variant_id,
                         'change_qty' => -$item->quantity,
+                        'type'       => 'sale',
                         'reason'     => 'order',
                         'note'       => 'Order ' . $order->code,
                     ]);
@@ -216,6 +225,7 @@ class CheckoutController extends Controller
                         'product_id' => $item->product_id,
                         'variant_id' => null,
                         'change_qty' => -$item->quantity,
+                        'type'       => 'sale',
                         'reason'     => 'order',
                         'note'       => 'Order ' . $order->code,
                     ]);
@@ -302,11 +312,8 @@ class CheckoutController extends Controller
 
     public function success(Order $order)
     {
-        // Có thể check thêm order thuộc về user hiện tại hay không
-        if (Auth::check() && $order->user_id !== Auth::id()) {
-            abort(403);
-        }
-
+        // Không cần check auth vì có thể user vừa thanh toán VNPay về
+        // Chỉ cần check order tồn tại là đủ
         return view('checkout.success', compact('order'));
     }
 
@@ -371,11 +378,15 @@ class CheckoutController extends Controller
                 'paid_at'        => now(),
             ]);
 
-            $order->update(['status' => 'paid']);
+            // Đã thanh toán thành công → chuyển sang processing để admin xử lý
+            $order->update(['status' => 'processing']);
 
-            if (Auth::check()) {
-                $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
-                $cart->items()->delete();
+            // Clear giỏ hàng cho user này (không cần Auth::check vì ta đã có user_id từ order)
+            if ($order->user_id) {
+                $cart = Cart::where('user_id', $order->user_id)->first();
+                if ($cart) {
+                    $cart->items()->delete();
+                }
             }
 
             return redirect()->route('checkout.success', $order)
@@ -386,6 +397,9 @@ class CheckoutController extends Controller
                 'status'      => 'failed',
                 'raw_payload' => $vnpData,
             ]);
+
+            // Cập nhật đơn hàng thành cancelled
+            $order->update(['status' => 'cancelled']);
 
             return redirect()->route('checkout.index')
                 ->with('error', 'Thanh toán VNPay thất bại hoặc bị huỷ. Vui lòng thử lại.');

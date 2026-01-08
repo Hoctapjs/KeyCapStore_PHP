@@ -1,170 +1,260 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard')
-@section('page-title', 'Dashboard')
+@section('title', 'Dashboard - Thống kê')
+@section('page-title', 'Dashboard - Thống kê')
 
 @section('content')
 <div class="container-fluid py-4">
+    <h2 class="mb-4">📊 Dashboard - Thống kê kinh doanh</h2>
 
-    <!-- Welcome Section -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h1 class="display-6 fw-bold mb-2">
-                Chào mừng trở lại! 👋
-            </h1>
-            <p class="text-muted fs-5">Tổng quan hệ thống quản trị</p>
+    {{-- Filter Section --}}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Chu kỳ</label>
+                    <select name="period" class="form-select" id="period-select">
+                        <option value="day" {{ $period == 'day' ? 'selected' : '' }}>Theo ngày</option>
+                        <option value="week" {{ $period == 'week' ? 'selected' : '' }}>Theo tuần</option>
+                        <option value="month" {{ $period == 'month' ? 'selected' : '' }}>Theo tháng</option>
+                        <option value="year" {{ $period == 'year' ? 'selected' : '' }}>Theo năm</option>
+                        <option value="custom" {{ $period == 'custom' ? 'selected' : '' }}>Tùy chỉnh</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-filter"></i> Lọc
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row g-4 mb-5">
-        <!-- Total Products -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm bg-primary text-white h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-box-seam fs-1 mb-3"></i>
-                    <h4 class="mb-1 fw-bold">{{ number_format($totalProducts) }}</h4>
-                    <small class="opacity-90">Tổng sản phẩm</small>
+    {{-- Stats Cards --}}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">💰 Tổng doanh thu</h6>
+                    <h3 class="mb-0">{{ number_format($stats['total_revenue']) }}₫</h3>
+                    <small>{{ $stats['total_orders'] }} đơn hàng</small>
                 </div>
             </div>
         </div>
-
-        <!-- Total Categories -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm bg-success text-white h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-folder2-open fs-1 mb-3"></i>
-                    <h4 class="mb-1 fw-bold">{{ $totalCategories }}</h4>
-                    <small class="opacity-90">Danh mục</small>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title">📦 Tổng nhập hàng</h6>
+                    <h3 class="mb-0">{{ number_format($stats['total_purchase']) }}₫</h3>
+                    <small>Chi phí nhập kho</small>
                 </div>
             </div>
         </div>
-
-        <!-- Total Brands -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm bg-info text-white h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-tags fs-1 mb-3"></i>
-                    <h4 class="mb-1 fw-bold">{{ $totalBrands }}</h4>
-                    <small class="opacity-90">Thương hiệu</small>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">📈 Lợi nhuận</h6>
+                    <h3 class="mb-0">{{ number_format($stats['profit']) }}₫</h3>
+                    <small>Doanh thu - Chi phí</small>
                 </div>
             </div>
         </div>
-
-        <!-- Low Stock Alert -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm bg-danger text-white h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-exclamation-triangle fs-1 mb-3"></i>
-                    <h4 class="mb-1 fw-bold">{{ $lowStockProducts }}</h4>
-                    <small class="opacity-90">Sắp hết hàng</small>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">🎯 Đơn trung bình</h6>
+                    <h3 class="mb-0">{{ number_format($stats['avg_order_value']) }}₫</h3>
+                    <small>Giá trị TB/đơn</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Access Section -->
-    <h4 class="mb-4 fw-bold text-dark">Quản lý nhanh</h4>
-    <div class="row g-4">
-
-        <!-- Products -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
+    {{-- Charts --}}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Biểu đồ Doanh thu & Nhập hàng</h5>
+                </div>
                 <div class="card-body">
-                    <i class="bi bi-box-seam text-primary fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Sản phẩm</h5>
-                    <p class="text-muted small mb-3">Quản lý sản phẩm & biến thể</p>
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-primary btn-sm">Danh sách</a>
-                        <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">Thêm mới</a>
+                    <canvas id="revenueChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Monthly Stats --}}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🏆 Thống kê Doanh thu (12 tháng)</h5>
+                </div>
+                <div class="card-body">
+                    @if($monthlyStats['highest_revenue_month'])
+                    <div class="mb-3">
+                        <strong class="text-success">Cao nhất:</strong> 
+                        Tháng {{ $monthlyStats['highest_revenue_month']->month }}/{{ $monthlyStats['highest_revenue_month']->year }}
+                        - <span class="badge bg-success">{{ number_format($monthlyStats['highest_revenue_month']->revenue) }}₫</span>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Orders -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="bi bi-truck text-success fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Đơn hàng</h5>
-                    <p class="text-muted small mb-3">Xử lý & theo dõi đơn hàng</p>
-                    <a href="{{ route('admin.orders.index') }}" class="btn btn-success btn-sm w-100">Quản lý đơn</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coupons -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="bi bi-ticket-perforated text-warning fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Mã giảm giá</h5>
-                    <p class="text-muted small mb-3">Tạo & quản lý khuyến mãi</p>
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('admin.coupons.index') }}" class="btn btn-outline-warning btn-sm">Danh sách</a>
-                        <a href="{{ route('admin.coupons.create') }}" class="btn btn-warning btn-sm">Tạo mới</a>
+                    @endif
+                    @if($monthlyStats['lowest_revenue_month'])
+                    <div>
+                        <strong class="text-danger">Thấp nhất:</strong> 
+                        Tháng {{ $monthlyStats['lowest_revenue_month']->month }}/{{ $monthlyStats['lowest_revenue_month']->year }}
+                        - <span class="badge bg-danger">{{ number_format($monthlyStats['lowest_revenue_month']->revenue) }}₫</span>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
-
-        <!-- Reviews -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">📦 Thống kê Nhập hàng (12 tháng)</h5>
+                </div>
                 <div class="card-body">
-                    <i class="bi bi-chat-square-text text-info fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Đánh giá</h5>
-                    <p class="text-muted small mb-3">Duyệt đánh giá khách hàng</p>
-                    <a href="{{ route('admin.reviews.index') }}" class="btn btn-info btn-sm w-100 text-white">Quản lý đánh giá</a>
+                    @if($monthlyStats['highest_purchase_month'])
+                    <div class="mb-3">
+                        <strong class="text-warning">Nhiều nhất:</strong> 
+                        Tháng {{ $monthlyStats['highest_purchase_month']->month }}/{{ $monthlyStats['highest_purchase_month']->year }}
+                        - <span class="badge bg-warning text-dark">{{ number_format($monthlyStats['highest_purchase_month']->total_cost) }}₫</span>
+                    </div>
+                    @endif
+                    @if($monthlyStats['lowest_purchase_month'])
+                    <div>
+                        <strong class="text-info">Ít nhất:</strong> 
+                        Tháng {{ $monthlyStats['lowest_purchase_month']->month }}/{{ $monthlyStats['lowest_purchase_month']->year }}
+                        - <span class="badge bg-info">{{ number_format($monthlyStats['lowest_purchase_month']->total_cost) }}₫</span>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
-
-        <!-- Categories -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="bi bi-folder2-open text-success fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Danh mục</h5>
-                    <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-success btn-sm w-100">Quản lý</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Brands -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="bi bi-tags text-warning fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Thương hiệu</h5>
-                    <a href="{{ route('admin.brands.index') }}" class="btn btn-outline-warning btn-sm w-100">Quản lý</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tags -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="bi bi-hash text-secondary fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Tags</h5>
-                    <a href="{{ route('admin.tags.index') }}" class="btn btn-outline-secondary btn-sm w-100">Quản lý</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Inventory -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="bi bi-inboxes text-danger fs-1 mb-3"></i>
-                    <h5 class="card-title mb-2">Tồn kho</h5>
-                    <a href="{{ route('admin.inventory.index') }}" class="btn btn-danger btn-sm w-100">Xem tồn kho</a>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chuẩn bị dữ liệu cho chart
+    const revenueData = @json($revenueData);
+    const purchaseData = @json($purchaseData);
+    const period = '{{ $period }}';
+
+    // Tạo labels và data
+    let labels = [];
+    let revenueValues = [];
+    let purchaseValues = [];
+
+    revenueData.forEach(item => {
+        let label = '';
+        if (period === 'day') {
+            label = item.date;
+        } else if (period === 'week') {
+            label = `Tuần ${item.week}`;
+        } else if (period === 'month') {
+            label = `${item.month}/${item.year}`;
+        } else if (period === 'year') {
+            label = item.year;
+        }
+        
+        labels.push(label);
+        revenueValues.push(item.revenue);
+    });
+
+    // Match purchase data với labels
+    purchaseValues = labels.map(label => {
+        const matchedItem = purchaseData.find(item => {
+            if (period === 'day') {
+                return item.date === label;
+            } else if (period === 'week') {
+                return item.week === label.replace('Tuần ', '');
+            } else if (period === 'month') {
+                return `${item.month}/${item.year}` === label;
+            } else if (period === 'year') {
+                return item.year == label;
+            }
+            return false;
+        });
+        return matchedItem ? matchedItem.total_cost : 0;
+    });
+
+    // Tạo chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Doanh thu (₫)',
+                    data: revenueValues,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                },
+                {
+                    label: 'Nhập hàng (₫)',
+                    data: purchaseValues,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(context.parsed.y);
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('vi-VN', {
+                                notation: 'compact',
+                                compactDisplay: 'short'
+                            }).format(value) + '₫';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+@endpush
 @endsection

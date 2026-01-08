@@ -607,9 +607,30 @@
                         <div class="card-body p-5">
 
                             <!-- Header -->
-                            <div class="mb-5">
-                                <h3 class="fw-bold mb-1">Đánh giá sản phẩm ({{ $totalReviews }})</h3>
-                                <p class="text-muted mb-0">Đánh giá từ khách hàng đã mua hàng</p>
+                            <div class="mb-5 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="fw-bold mb-1">Đánh giá sản phẩm ({{ $totalReviews }})</h3>
+                                    <p class="text-muted mb-0">Đánh giá từ khách hàng đã mua hàng</p>
+                                </div>
+                                @auth
+                                    <div>
+                                        @if($userReview)
+                                            <a href="{{ route('review.edit', $userReview) }}" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-pencil-square me-2"></i>Sửa đánh giá
+                                            </a>
+                                        @else
+                                            <a href="{{ route('review.create', $product) }}" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
+                                            </a>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div>
+                                        <a href="{{ route('login') }}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-pencil-square me-2"></i>Viết đánh giá
+                                        </a>
+                                    </div>
+                                @endauth
                             </div>
 
                             <!-- Rating Summary -->
@@ -730,12 +751,29 @@
                                 @empty
                                     <div class="text-center py-5">
                                         <i class="bi bi-chat-square-text fs-1 text-muted d-block mb-4"></i>
-                                        <p class="fs-4 text-muted mb-3">Chưa có đánh giá nào cho sản phẩm này.</p>
-                                        @auth
-                                            <a href="{{ route('review.create', $product) }}" class="btn btn-primary btn-lg">
-                                                <i class="bi bi-pencil-square me-2"></i>Viết đánh giá đầu tiên
+                                        @if(request('rating') && request('rating') != 'all')
+                                            <p class="fs-4 text-muted mb-3">Chưa có đánh giá {{ request('rating') }} sao.</p>
+                                            <a href="{{ route('products.show', $product->slug) }}" class="btn btn-secondary btn-sm">
+                                                <i class="bi bi-arrow-left me-2"></i>Xem tất cả đánh giá
                                             </a>
-                                        @endauth
+                                        @else
+                                            @auth
+                                                @if($userReview)
+                                                    <p class="fs-4 text-muted mb-3">Bạn đã đánh giá sản phẩm này.</p>
+                                                    <a href="{{ route('review.edit', $userReview) }}" class="btn btn-warning btn-lg">
+                                                        <i class="bi bi-pencil-square me-2"></i>Sửa đánh giá
+                                                    </a>
+                                                @else
+                                                    <p class="fs-4 text-muted mb-3">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                                    <a href="{{ route('review.create', $product) }}" class="btn btn-primary btn-lg">
+                                                        <i class="bi bi-pencil-square me-2"></i>Viết đánh giá đầu tiên
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <p class="fs-4 text-muted mb-3">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                                <p class="text-muted mb-3">Vui lòng <a href="{{ route('login') }}">đăng nhập</a> để viết đánh giá.</p>
+                                            @endauth
+                                        @endif
                                     </div>
                                 @endforelse
                             </div>

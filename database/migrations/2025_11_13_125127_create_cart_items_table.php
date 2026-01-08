@@ -21,8 +21,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('cart_id')->references('id')->on('carts')->cascadeOnDelete();
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('variant_id')->references('id')->on('product_variants');
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
+            $table->foreign('variant_id')->references('id')->on('product_variants')->cascadeOnDelete();
         });
     }
 

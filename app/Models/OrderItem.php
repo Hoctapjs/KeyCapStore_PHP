@@ -34,4 +34,24 @@ class OrderItem extends Model
     {
         return $this->belongsTo(ProductVariant::class);
     }
+
+    // Accessors for easier usage in views
+    public function getProductNameAttribute()
+    {
+        return $this->title_snapshot;
+    }
+
+    public function getVariantNameAttribute()
+    {
+        if ($this->variant_id && $this->variant) {
+            $options = $this->variant->option_values ?? [];
+            return is_array($options) ? implode(' - ', $options) : '';
+        }
+        return null;
+    }
+
+    public function getPriceSnapshotAttribute()
+    {
+        return $this->price;
+    }
 }

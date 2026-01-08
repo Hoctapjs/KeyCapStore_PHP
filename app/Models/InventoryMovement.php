@@ -15,8 +15,10 @@ class InventoryMovement extends Model
         'product_id',
         'variant_id',
         'change_qty',
+        'type',
         'reason',
         'note',
+        'unit_cost',
         'created_at',
     ];
 

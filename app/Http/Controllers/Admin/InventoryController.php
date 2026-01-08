@@ -13,36 +13,23 @@ class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        // Hiển thị danh sách variants để quản lý tồn kho
-        $query = ProductVariant::with(['product.brand', 'product.productImages']);
+        // Hiển thị danh sách sản phẩm với tổng tồn kho
+        $query = Product::with(['variants', 'brand', 'productImages']);
 
-        // Filter by stock status
-        if ($request->has('stock_status') && $request->stock_status !== '') {
-            $status = $request->stock_status;
-            if ($status == 'out') {
-                $query->where('stock_quantity', '=', 0);
-            } elseif ($status == 'low') {
-                $query->where('stock_quantity', '>', 0)->where('stock_quantity', '<=', 10);
-            } elseif ($status == 'sufficient') {
-                $query->where('stock_quantity', '>', 10);
-            }
-        }
-
-        // Search by product title or variant SKU
+        // Search by product title or code
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('sku', 'like', "%{$search}%")
-                  ->orWhereHas('product', function($productQuery) use ($search) {
-                      $productQuery->where('title', 'like', "%{$search}%")
-                                   ->orWhere('code', 'like', "%{$search}%");
-                  });
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
-        $variants = $query->orderBy('stock_quantity', 'asc')->paginate(20);
+        $products = $query->withCount('variants')
+                         ->orderBy('created_at', 'desc')
+                         ->paginate(20);
 
-        // Statistics từ variants
+        // Statistics từ tất cả variants
         $stats = [
             'sufficient' => ProductVariant::where('stock_quantity', '>', 10)->count(),
             'low' => ProductVariant::where('stock_quantity', '>', 0)->where('stock_quantity', '<=', 10)->count(),
@@ -50,7 +37,7 @@ class InventoryController extends Controller
             'total_value' => ProductVariant::selectRaw('SUM(stock_quantity * price) as total')->value('total') ?? 0,
         ];
 
-        return view('admin.inventory.index', compact('variants', 'stats'));
+        return view('admin.inventory.index', compact('products', 'stats'));
     }
 
     public function adjust(Request $request)
@@ -59,6 +46,8 @@ class InventoryController extends Controller
             'variant_id' => 'required|exists:product_variants,id',
             'type' => 'required|in:in,out',
             'quantity' => 'required|integer|min:1',
+            'movement_type' => 'required|in:purchase,sale,adjustment,return,manual',
+            'unit_cost' => 'nullable|numeric|min:0',
             'note' => 'nullable|string|max:500',
         ]);
 
@@ -80,7 +69,8 @@ class InventoryController extends Controller
                 'product_id' => $variant->product_id,
                 'variant_id' => $variant->id,
                 'change_qty' => $changeQty,
-                'reason' => 'manual',
+                'type' => $validated['movement_type'],
+                'unit_cost' => $validated['unit_cost'] ?? null,
                 'note' => $validated['note'] ?? null,
             ]);
 
@@ -105,22 +95,33 @@ class InventoryController extends Controller
     {
         $validated = $request->validate([
             'change_qty' => 'required|integer',
-            'reason' => 'required|in:order,restock,manual,refund',
-            'note' => 'nullable|string|max:255',
+            'change_qty_type' => 'required|in:in,out',
+            'type' => 'required|in:purchase,sale,adjustment,return,manual',
+            'unit_cost' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
         try {
+            // Xử lý loại điều chỉnh
+            $change = $validated['change_qty_type'] == 'in' ? $validated['change_qty'] : -$validated['change_qty'];
+            
             // Update product stock
-            $product->stock += $validated['change_qty'];
+            $product->stock += $change;
+            
+            if ($product->stock < 0) {
+                throw new \Exception('Số lượng tồn kho không được âm');
+            }
+            
             $product->save();
 
             // Create inventory movement
             InventoryMovement::create([
                 'product_id' => $product->id,
                 'variant_id' => null,
-                'change_qty' => $validated['change_qty'],
-                'reason' => $validated['reason'],
+                'change_qty' => $change,
+                'type' => $validated['type'],
+                'unit_cost' => $validated['unit_cost'] ?? null,
                 'note' => $validated['note'] ?? null,
             ]);
 
@@ -136,7 +137,8 @@ class InventoryController extends Controller
     {
         $validated = $request->validate([
             'change_qty' => 'required|integer',
-            'reason' => 'required|in:order,restock,manual,refund',
+            'type' => 'required|in:purchase,sale,adjustment,return,manual',
+            'unit_cost' => 'nullable|numeric|min:0',
             'note' => 'nullable|string|max:255',
         ]);
 
@@ -151,7 +153,8 @@ class InventoryController extends Controller
                 'product_id' => $variant->product_id,
                 'variant_id' => $variant->id,
                 'change_qty' => $validated['change_qty'],
-                'reason' => $validated['reason'],
+                'type' => $validated['type'],
+                'unit_cost' => $validated['unit_cost'] ?? null,
                 'note' => $validated['note'] ?? null,
             ]);
 
