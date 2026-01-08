@@ -204,7 +204,8 @@ class DashboardController extends Controller
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('year', 'month')
-            ->orderBy('revenue', 'desc')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
             ->get();
 
         $monthlyPurchase = DB::table('inventory_movements')
@@ -217,14 +218,21 @@ class DashboardController extends Controller
                 DB::raw('SUM(ABS(change_qty) * unit_cost) as total_cost')
             )
             ->groupBy('year', 'month')
-            ->orderBy('total_cost', 'desc')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
             ->get();
 
+        // Find highest and lowest
+        $highestRevenue = $monthlyRevenue->sortByDesc('revenue')->first();
+        $lowestRevenue = $monthlyRevenue->sortBy('revenue')->first();
+        $highestPurchase = $monthlyPurchase->sortByDesc('total_cost')->first();
+        $lowestPurchase = $monthlyPurchase->sortBy('total_cost')->first();
+
         return [
-            'highest_revenue_month' => $monthlyRevenue->first(),
-            'lowest_revenue_month' => $monthlyRevenue->last(),
-            'highest_purchase_month' => $monthlyPurchase->first(),
-            'lowest_purchase_month' => $monthlyPurchase->last(),
+            'highest_revenue_month' => $highestRevenue,
+            'lowest_revenue_month' => $lowestRevenue,
+            'highest_purchase_month' => $highestPurchase,
+            'lowest_purchase_month' => $lowestPurchase,
         ];
     }
 }
